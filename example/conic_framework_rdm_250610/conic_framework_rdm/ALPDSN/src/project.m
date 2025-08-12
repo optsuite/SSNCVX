@@ -1,0 +1,264 @@
+%%************************************************************************
+%% project: compute projection onto the intersection of the cone K and the polyhedral L <= X <= U
+%%
+% usage
+% [Y, par] = project(K, X);
+% [Y, par] = project(K, X, L, U);  % Not recommend. In this case, this Jacobian is computed at the projection onto K hence not accurate .
+% [Y, par] = project(K, X);
+%%
+%ouput
+%  Y: MatCell, the projection of X onto the area
+%  par: ProjJac, the Jacobian of the projection operator. par is the shortname of partial.
+%      detailed decsription of each field of par is in ProjJac.m
+%%************************************************************************
+
+function [Y, par] = project(K, X, L, U)
+
+    if nargin < 3
+        L = [];
+    end
+
+    if nargin < 4
+        U = [];
+    end
+
+    tol = 1e-15; % % must be small as it will affect gap
+    addtol = 1e-6;
+    Y = MatCell(length(X));
+
+    if nargout > 1
+        par = ProjJac(length(K));
+    end
+
+    %%
+    for p = 1:length(K)
+        cone = K{p};
+
+        if strcmp(cone.type, 's')
+            n = sum(cone.size);
+
+            if nargout == 1
+
+%                 if (length(cone.size) ==  1) || (sum(cone.size) < 100)
+                    [Yp] = project_sdp(X{p}, tol);
+%                 else
+%                     [Yp] = project_sdp(X{p}, tol);
+%                 end
+            else
+%                 if (length(cone.size) == 1) || (sum(cone.size) < 100)
+                    [Yp, P, Dsch2, dd, posidx] = project_sdp(X{p}, tol);
+%                 else
+%                     [Yp, P, Dsch2, dd, posidx] = project_sdp(X{p}, tol);
+%                 end
+
+                Dsch2 = max(addtol, Dsch2);
+                Dsch1 = 1;
+                shift = 0;
+
+                if ~isempty(posidx)
+                    P1 = P(:, posidx);
+                    P2 = P(:, setdiff(1:n, posidx));
+                else
+                    P1 = [];
+                    P2 = P;
+                end
+
+            end
+
+        elseif strcmp(cone.type, 'q')
+
+            if nargout == 1
+                [Yp] = mexprojection_cone_q(X{p}, cone.size);
+            else
+                [Yp, dd, Dsch1, Dsch2, P1, P2, shift] = mexprojection_cone_q(X{p}, cone.size);
+                posidx = find(dd > tol);
+            end
+
+            % check
+
+            % norm(X{p} - dd(:, 1) .* P1 - dd(:, 2) .* P2)
+
+            % P1' * P1 - length(cone.size)
+            % P2' * P2 - length(cone.size)
+
+            % if length(cone.size) == 1
+            %    mat = shift * speye(sum(cone.size)) + Dsch1 * P1 * P1' + Dsch2 * P2 * P2'
+            %    norm(mat(2:end, 1))
+            %    if dd(1) >= 0  && dd(2) <= 0
+            %    x = X{p};
+            %    xbartmp = x(2: end) / norm(x(2: end));
+            %    mat1 = 0.5 * [1, xbartmp'; ...
+            %    xbartmp, (1 + x(1) / norm(x(2: end)) ) * speye(size(x, 1) - 1) - x(1) / norm(x(2: end)) * (xbartmp * xbartmp')]
+            %    norm(mat1(2:end, 1))
+
+            %    end
+            % end
+        elseif strcmp(cone.type, 'l')
+            n = sum(cone.size);
+            Yp = zeros(n, 1);
+            posidx = find(X{p} > tol);
+
+            if ~isempty(posidx)
+                Yp(posidx) = abs(X{p}(posidx));
+            end
+
+            if nargout > 1
+                P1 = []; P2 = [];
+                %Dsch2 = addtol*ones(n,1);  % purtubation
+                Dsch2 = zeros(n, 1);
+                Dsch1 = [];
+                posidx = find(X{p} > tol);
+
+                if ~isempty(posidx)
+                    Dsch2(posidx) = ones(length(posidx), 1);
+                end
+
+                dd = X{p};
+                shift = 0;
+            end
+
+        elseif strcmp(cone.type, 'u')
+            Yp = X{p};
+
+            if nargout > 1
+                P1 = []; P2 = [];
+                %%***** perturbation *****
+                Dsch2 = [];
+                Dsch1 = [];
+                posidx = [];
+                dd = [];
+                shift = 0;
+            end
+
+        end
+
+        if ~isempty(L)
+            Yp = max(Yp, L{p});
+        end
+
+        if ~isempty(U)
+            Yp = min(Yp, U{p});
+        end
+
+        Y{p} = Yp;
+
+        if nargout > 1
+            par.P1{p} = P1;
+            par.P1t{p} = P1';
+            par.P2{p} = P2;
+            par.P2t{p} = P2';
+            par.dd{p} = dd;
+            par.posidx{p} = posidx;
+            par.Dsch2{p} = Dsch2;
+%             par.Dsch2t{p} = Dsch2';
+            par.Dsch1{p} = Dsch1;
+            par.shift{p} = shift;
+        end
+
+    end
+
+end
+
+%%***************************************************************************
+
+function [Y, V, Dsch2, d, posidx] = project_sdp(X, tol)
+    n = length(X);
+%     exist_mexeig = exist('mexeig', 'file');
+exist_mexeig = 0;
+    X(abs(X) < 1e-14) = 0;
+    X = 0.5 * (X + X');
+
+    if (exist_mexeig == 3)
+        %[V,D] = mexeig(full(X));
+        [V, D] = eig(full(X));
+    else
+        [V, D] = eig(full(X));
+    end
+
+    d = diag(D);
+    [d, idx] = sort(real(d));
+    idx = idx(n:-1:1); d = d(n:-1:1);
+    V = V(:, idx);
+    posidx = find(d > tol);
+
+    if isempty(posidx)
+        Y = sparse(n, n);
+        Dsch2 = [];
+    elseif (length(posidx) == n)
+        Y = X;
+        Dsch2 = [];
+    else
+        r = length(posidx); s = n - r;
+        negidx = [r + 1:n];
+        dp = abs(d(posidx));
+        dn = abs(d(negidx));
+        Vtmp = V(:, posidx) * diag(sqrt(dp));
+        Y = Vtmp * Vtmp';
+        Y = 0.5 * (Y + Y');
+        Dsch2 = (dp * ones(1, s)) ./ (dp * ones(1, s) + ones(r, 1) * dn');
+    end
+
+end
+
+function [Y, V, Dsch2, d, posidx] = project_sdp_multiblock(X, tol)
+
+    n = length(X);
+    exist_mexeig = exist('mexeig', 'file');
+    X(abs(X) < 1e-14) = 0;
+
+    X = 0.5 * (X + X');
+    pm = symamd(X);
+    Xperm = X(pm, pm);
+    [t, ~] = etree(Xperm);
+    idx0 = find(t == 0);
+    len0 = length(idx0);
+    Dsub = zeros(n, 1);
+    d = zeros(n, 1);
+    Vsub = cell(n, 1);
+    offset = 1;
+
+    for it = 1:len0
+        idx = offset:idx0(it);
+
+        if (exist_mexeig == 3)
+            %[Vsub0,Dsub0] = mexeig(full(Xperm(idx,idx)));
+            [Vsub0, Dsub0] = eig(full(Xperm(idx, idx)));
+        else
+            [Vsub0, Dsub0] = eig(full(Xperm(idx, idx)));
+        end
+
+        Dsub0 = diag(Dsub0);
+        Vsub{it} = Vsub0;
+        Dsub(idx) = Dsub0;
+        offset = idx0(it) + 1;
+    end
+
+    V = blkdiag(Vsub{:});
+    V(pm, pm) = V;
+    d(pm) = Dsub;
+
+    [d, idx] = sort(real(d));
+    idx = idx(n:-1:1); d = d(n:-1:1);
+    V = V(:, idx);
+    posidx = find(d > tol);
+
+    if isempty(posidx)
+        Y = sparse(n, n);
+        Dsch2 = [];
+    elseif (length(posidx) == n)
+        Y = X;
+        Dsch2 = [];
+    else
+        r = length(posidx); s = n - r;
+        negidx = [r + 1:n];
+        dp = abs(d(posidx));
+        dn = abs(d(negidx));
+        Vtmp = V(:, posidx) * diag(sqrt(dp));
+        Y = Vtmp * Vtmp';
+        Y = 0.5 * (Y + Y');
+        Dsch2 = (dp * ones(1, s)) ./ (dp * ones(1, s) + ones(r, 1) * dn');
+    end
+
+end
+
+%%************************************************************************

@@ -1,0 +1,320 @@
+function [value, genD] = prox_p(pblk, X, params)
+plength = length(pblk);
+for i =1:plength
+    if  strcmp(pblk{i}.type,'l1')
+        value{i,1} = sign(X{i}).*max(abs(X{i})- pblk{i}.coefficient*params.sigma,0);
+        genD{i,1} = value{i,1} ~= 0;
+    elseif  strcmp(pblk{i}.type, 'huber')
+        lambda = pblk{i}.coefficient*params.sigma;
+        delta = pblk{i}.coefficient2;
+        abs_X = abs(X{i});
+        threshold = delta * (1 + lambda);
+        value{i,1} = X{i} ./ (1 + lambda) .* (abs_X <= threshold) + (X{i} - lambda * delta * sign(X{i})) .* (abs_X > threshold);
+        genD{i,1} = (1 + lambda) .* (abs_X <= threshold) + (abs_X > threshold);
+    elseif strcmp(pblk{i}.type,'box')
+        tiny = 1e-14;
+        % value{i,1} = X{i};
+        if ~isempty(pblk{i}.l)
+            value{i,1} = max(X{i},pblk{i}.l+tiny);
+        end
+        if ~isempty(pblk{i}.u)
+            value{i,1} = min( value{i,1},pblk{i}.u-tiny);
+        end
+        if nargout == 2
+            genD{i,1} = abs(value{i,1} - X{i}) < 1e-16;
+        end
+    elseif strcmp(pblk{i}.type,'linfty')
+        [value{i,1},  genD{i,1}] = projLinfty(X{i},pblk{i}.coefficient*params.sigma);
+    elseif strcmp(pblk{i}.type,'max')
+        [value{i,1},  genD{i,1}] = projSimplex(X{i},pblk{i}.coefficient*params.sigma);
+    elseif strcmp(pblk{i}.type,'topk')
+        [value{i,1},  genD{i,1}] = projTopk(X{i},pblk{i}.coefficient*params.sigma,pblk{i}.topk);
+    elseif strcmp(pblk{i}.type,'l1topk')
+        [value{i,1},  genD{i,1}] = projL1Topk(X{i},pblk{i}.coefficient*params.sigma,pblk{i}.topk);
+    elseif strcmp(pblk{i}.type,'l') || strcmp(pblk{i}.type,'b2l')
+        tol = 1e-15;
+        n = pblk{i}.size;
+        Yp = zeros(n, 1);
+        posidx = find(X{i} > tol);
+        if ~isempty(posidx)
+            Yp(posidx) = abs(X{i}(posidx));
+        end
+        if nargout > 1
+            D = zeros(n, 1);
+            posidx = find(X{i} > tol);
+            if ~isempty(posidx)
+                D(posidx) = ones(length(posidx), 1);
+            end
+
+            genD{i,1} = D;
+        end
+        value{i,1} = Yp;
+    elseif strcmp(pblk{i}.type,'s')
+        n = pblk{i}.size;
+        tol = 1e-15;
+        addtol = 1e-6;
+        if nargout == 1
+            [Yp] = project_sdp(X{i}, tol);
+        else
+            [Yp, P, D12, dd, posidx] = project_sdp(X{i}, tol);
+
+            D12 = max(addtol, D12);
+            D11 = 1;
+            shift = 0;
+            if ~isempty(posidx)
+                P1 = P(:, posidx);
+                P2 = P(:, setdiff(1:n, posidx));
+            else
+                P1 = [];
+                P2 = P;
+            end
+            genD{i,1}.D12 = D12;
+            genD{i,1}.D11 = D11;
+            genD{i,1}.P1 = P1;
+            genD{i,1}.P2 = P2;
+            genD{i,1}.P1t = P1';
+            genD{i,1}.P2t = P2';
+        end
+        value{i,1} = Yp;
+
+    elseif strcmp(pblk{i}.type,'q')
+        cone = pblk{i};
+        if nargout == 1
+            [Yp] = mexprojection_cone_q(X{i}, cone.size);
+        else
+            [Yp, dd, D1, D2, P1, P2, shift] = mexprojection_cone_q(X{i}, cone.size);
+            % posidx = find(dd > tol);
+
+            ncols = length(cone.size);
+            nrows = sum(cone.size);
+            Prow_index = 1:nrows;
+            Pcol_index = repelem(1:ncols, cone.size);
+            Pvalue1 = P1(:);
+            Pvalue2 = P2(:);
+            Q1 = sparse(Prow_index, Pcol_index, Pvalue1, nrows, ncols);
+            Q2 = sparse(Prow_index, Pcol_index, Pvalue2, nrows, ncols);
+
+            genD{i,1}.D1 = D1;
+            genD{i,1}.D2 = D2;
+            genD{i,1}.P1 = P1;
+            genD{i,1}.P2 = P2;
+            genD{i,1}.shift = shift;
+            genD{i,1}.Q1 = Q1;
+            genD{i,1}.Q2 = Q2;
+        end
+        value{i,1} = Yp;
+    elseif strcmp(pblk{i}.type,'nuclear')
+        [n1,n2] = size(X{i});
+        [U, S, V] = svd(X{i});
+        genD{i,1}.Ueig(:,:) = U;
+        genD{i,1}.Veig(:,:) = V;
+        Stmp = diag(S);
+
+        S = max(Stmp- pblk{i}.coefficient*params.sigma,0);
+        r = length(find(S~=0));
+        s = min(size(X{i}))-r;
+        S = S(1:r);
+        genD{i,1}.Seig = Stmp;
+        value{i,1} = U(:,1:r)*diag(S)*V(:,1:r)';
+        a = pblk{i}.coefficient*params.sigma;
+
+        genD{i,1}.Dsch11(:,:,1) =  ones(r,1)*ones(1,r);
+        genD{i,1}.Hsch11(:,:,1) = (genD{i,1}.Seig(1:r,1)*ones(1,r) + ones(r,1)*genD{i,1}.Seig(1:r,1)' - 2*a)./(genD{i,1}.Seig(1:r,1)*ones(1,r) + ones(r,1)*genD{i,1}.Seig(1:r,1)');
+        genD{i,1}.Dsch12(:,:,1) = (genD{i,1}.Seig(1:r,1)*ones(1,s) - a )./(genD{i,1}.Seig(1:r,1)*ones(1,s) - ones(r,1)*genD{i,1}.Seig(r+1:end,1)');
+        genD{i,1}.Hsch12(:,:,1) = (genD{i,1}.Seig(1:r,1)*ones(1,s) - a )./(genD{i,1}.Seig(1:r,1)*ones(1,s) + ones(r,1)*genD{i,1}.Seig(r+1:end,1)');
+        genD{i,1}.Dsch13(:,:,1) = (genD{i,1}.Seig(1:r,1)*ones(1,n2-n1) - a )./(genD{i,1}.Seig(1:r,1)*ones(1,n2-n1) ) ;
+
+        genD{i,1}.trank = r;
+        genD{i,1}.U1 = genD{i,1}.Ueig(:,1:genD{i,1}.trank,:);
+        genD{i,1}.U2 = genD{i,1}.Ueig(:,genD{i,1}.trank+1:end,:);
+        genD{i,1}.V1 = genD{i,1}.Veig(:,1:genD{i,1}.trank,:);
+        genD{i,1}.V2 = genD{i,1}.Veig(:,genD{i,1}.trank+1:n1,:);
+        genD{i,1}.V3 = genD{i,1}.Veig(:,n1+1:n2,:);
+
+        genD{i,1}.U1T = genD{i,1}.U1';
+        genD{i,1}.U2T = genD{i,1}.U2';
+        genD{i,1}.V1T = genD{i,1}.V1';
+        genD{i,1}.V2T = genD{i,1}.V2';
+        genD{i,1}.V3T = genD{i,1}.V3';
+    elseif strcmp(pblk{i}.type,'l2') || strcmp(pblk{i}.type,'frobenius')
+        nrmx = norm(X{i});
+        if nrmx < pblk{i}.coefficient*params.sigma
+            value{i,1} = zeros(size(X{i}));
+            genD{i,1}.nrmx = 1;
+            genD{i,1}.type = 1;
+            genD{i,1}.coefficient = pblk{i}.coefficient;
+            genD{i,1}.sigma = params.sigma;
+            genD{i,1}.coe1 = 0;
+            genD{i,1}.coe2 = 0;
+        else
+            value{i,1} = X{i} - params.sigma*pblk{i}.coefficient*X{i}/nrmx;
+            genD{i,1}.coefficient = pblk{i}.coefficient;
+            genD{i,1}.sigma = params.sigma;
+            genD{i,1}.nrmx = nrmx;
+            genD{i,1}.coe1 = 1 - pblk{i}.coefficient*params.sigma/nrmx;
+            genD{i,1}.coe2 = pblk{i}.coefficient*params.sigma/nrmx;
+            genD{i,1}.X = X{i}/nrmx;
+            genD{i,1}.type = 2;
+        end
+    elseif strcmp(pblk{i}.type,'l2l2')
+        [n1,n2] = size(X{i});
+        [U, S, V] = svd(X{i});
+        genD{i,1}.Ueig(:,:) = U;
+        genD{i,1}.Veig(:,:) = V;
+        Stmp = diag(S);
+        f = @(mu) sum(max(Stmp/(pblk{i}.coefficient*params.sigma) - mu*ones(size(Stmp)),0)) - 1;
+        options = optimset('Display', 'off');
+        mu = fsolve(f,0,options);
+        tmp = max(Stmp/(pblk{i}.coefficient*params.sigma) - mu ,0);
+        S = Stmp - pblk{i}.coefficient*params.sigma*tmp;
+
+        r = length(find(S~=0));
+        s = min(size(X{i}))-r;
+        S = S(1:r);
+        genD{i,1}.Seig(:,i) = Stmp;
+        value{i,1} = U(:,1:r)*diag(S)*V(:,1:r)';
+        a = pblk{i}.coefficient*params.sigma;
+
+        genD{i,1}.Dsch11(:,:,1) =  (S(1:r)' - S(1:r))./(Stmp(1:r)' - Stmp(1:r)+1e-7);
+        genD{i,1}.Hsch11(:,:,1) =  (S(1:r)' + S(1:r))./(Stmp(1:r)' + Stmp(1:r)+1e-7);
+        genD{i,1}.Dsch12(:,:,1) = (S(1:r,1)*ones(1,s) )./(genD{i,1}.Seig(1:r,1)*ones(1,s) - ones(r,1)*genD{i,1}.Seig(r+1:end,1)');
+        genD{i,1}.Hsch12(:,:,1) = (S(1:r,1)*ones(1,s) )./(genD{i,1}.Seig(1:r,1)*ones(1,s) + ones(r,1)*genD{i,1}.Seig(r+1:end,1)');
+        genD{i,1}.Dsch13(:,:,1) = (S(1:r,1)*ones(1,n2-n1) - a )./(genD{i,1}.Seig(1:r,1)*ones(1,n2-n1) ) ;
+
+        genD{i,1}.trank = r;
+        genD{i,1}.U1 = genD{i,1}.Ueig(:,1:genD{i,1}.trank,:);
+        genD{i,1}.U2 = genD{i,1}.Ueig(:,genD{i,1}.trank+1:end,:);
+        genD{i,1}.V1 = genD{i,1}.Veig(:,1:genD{i,1}.trank,:);
+        genD{i,1}.V2 = genD{i,1}.Veig(:,genD{i,1}.trank+1:n1,:);
+        genD{i,1}.V3 = genD{i,1}.Veig(:,n1+1:n2,:);
+
+        genD{i,1}.U1T = genD{i,1}.U1';
+        genD{i,1}.U2T = genD{i,1}.U2';
+        genD{i,1}.V1T = genD{i,1}.V1';
+        genD{i,1}.V2T = genD{i,1}.V2';
+        genD{i,1}.V3T = genD{i,1}.V3';
+    elseif strcmp(pblk{i}.type,'l1con')
+        [value{i,1},  genD{i,1}] = projLinfty(X{i},pblk{i}.coefficient*params.sigma);
+        value{i,1} = X{i} - value{i,1};
+        genD{i,1} = ones(size(genD{i,1})) - genD{i,1};
+    elseif strcmp(pblk{i}.type,'l2con')
+        nrmx = norm(X{i});
+        if nrmx < pblk{i}.coefficient*params.sigma
+            value{i,1} = X{i};
+            genD{i,1}.nrmx = 1;
+            genD{i,1}.type = 1;
+            genD{i,1}.coefficient = pblk{i}.coefficient;
+            genD{i,1}.sigma = params.sigma;
+            genD{i,1}.coe1 = 1;
+            genD{i,1}.coe2 = 0;
+        else
+            value{i,1} = params.sigma*pblk{i}.coefficient*X{i}/nrmx;
+            genD{i,1}.coefficient = pblk{i}.coefficient;
+            genD{i,1}.sigma = params.sigma;
+            genD{i,1}.nrmx = nrmx;
+            genD{i,1}.coe1 = pblk{i}.coefficient*params.sigma/nrmx;
+            genD{i,1}.coe2 = -pblk{i}.coefficient*params.sigma/nrmx;
+            genD{i,1}.X = X{i}/nrmx;
+            genD{i,1}.type = 2;
+        end
+    elseif strcmp(pblk{i}.type,'linftycon')
+        genD{i,1} = abs(X{i}) <= pblk{i}.coefficient*params.sigma;
+        value{i,1} = X{i} - sign(X{i}).*max(abs(X{i})- pblk{i}.coefficient*params.sigma,0);
+    elseif strcmp(pblk{i}.type,'l1l2')
+        [~,n2] = size(X{i});
+        value{i,1} = zeros(size(X{i}));
+        for j = 1:n2
+            Xj = X{i}(:,j);
+            nrmx(j) = norm(Xj);
+            if nrmx < pblk{i}.coefficient*params.sigma
+                value{i,1}(:,j) = zeros(size(Xj));
+                genD{i,j}.nrmx = 1;
+                genD{i,j}.coefficient = pblk{i}.coefficient;
+                genD{i,j}.sigma = params.sigma;
+                genD{i,j}.coe1 = 0;
+                genD{i,j}.coe2 = 0;
+                genD{i,j}.type = 1;
+            else
+                value{i,1}(:,j) = Xj - params.sigma*pblk{i}.coefficient*Xj/nrmx(j);
+                genD{i,j}.coefficient = pblk{i}.coefficient;
+                genD{i,j}.sigma = params.sigma;
+                genD{i,j}.nrmx = nrmx(j);
+                genD{i,j}.coe1 = 1 - pblk{i}.coefficient*params.sigma/nrmx(j);
+                genD{i,j}.coe2 = pblk{i}.coefficient*params.sigma/nrmx(j);
+                genD{i,j}.X = Xj/nrmx(j);
+                genD{i,j}.type = 2;
+            end
+        end
+    elseif strcmp(pblk{i}.type,'l1linfty')
+        valuetmp = zeros(size(X{i}));
+        Gentmp = zeros(size(X{i}));
+        for j = 1:pblk{i}.size(2)
+            [valuetmp(:,j),  Gentmp(:,j)] = projLinfty(X{i}(:,j),pblk{i}.coefficient*params.sigma);
+        end
+        value{i,1} = valuetmp;
+        genD{i,1} = Gentmp;
+    elseif strcmp(pblk{i}.type,'fused')
+        [value{i,1},info] = proxFL(pblk{i}.Binput,X{i},params.sigma*pblk{i}.coefficient,params.sigma*pblk{i}.coefficient2);
+        genD{i,1}.info = info;
+        genD{i,1}.rr1 = info.rr1; % ~rr1: part 1
+        %         indexrr1 = rr1>0;
+        genD{i,1}.rr2 = info.rr2;
+        [h,U] = mexFusedLassoJacobian(double(genD{i,1}.rr2));
+        genD{i,1}.h = h;
+        genD{i,1}.U = U;
+        genD{i,1}.Ph = h(genD{i,1}.rr1);
+        if ~isempty(U)
+            Ut = U';
+            PU = Ut(:,genD{i,1}.rr1)';
+        else
+            PU = [];
+        end
+        nrm = sum(PU);
+        genD{i,1}.PU = PU;
+        genD{i,1}.nzcolidx = find(nrm > 0);
+        genD{i,1}.tmpfactor = 1;
+        genD{i,1}.tmpfactor2 = 1;
+    else
+        [value{i,1}, genD{i,1}] = pblk{i}.prox(X{i},pblk{i}.coefficient,params.sigma);
+    end
+end
+end
+
+function [Y, V, Dsch2, d, posidx] = project_sdp(X, tol)
+n = length(X);
+%     exist_mexeig = exist('mexeig', 'file');
+exist_mexeig = 0;
+X(abs(X) < 1e-14) = 0;
+X = 0.5 * (X + X');
+
+if (exist_mexeig == 3)
+    [V,D] = mexeig(full(X));
+    [V, D] = eig(full(X));
+else
+    [V, D] = eig(full(X));
+end
+
+d = diag(D);
+[d, idx] = sort(real(d));
+idx = idx(n:-1:1); d = d(n:-1:1);
+V = V(:, idx);
+posidx = find(d > tol);
+
+if isempty(posidx)
+    Y = sparse(n, n);
+    Dsch2 = [];
+elseif (length(posidx) == n)
+    Y = X;
+    Dsch2 = [];
+else
+    r = length(posidx); s = n - r;
+    negidx = [r + 1:n];
+    dp = abs(d(posidx));
+    dn = abs(d(negidx));
+    Vtmp = V(:, posidx) * diag(sqrt(dp));
+    Y = Vtmp * Vtmp';
+    Y = 0.5 * (Y + Y');
+    Dsch2 = (dp * ones(1, s)) ./ (dp * ones(1, s) + ones(r, 1) * dn');
+end
+
+end

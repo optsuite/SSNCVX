@@ -1,0 +1,333 @@
+
+  
+function [dx,dy,trans]= gendirectionxy(Ftz,K,At,trans,cgopts, method)
+if ~isfield(trans,'barrier')
+    trans.barrier = 0;
+end
+if nargin < 6
+    method = 'iterative';
+end
+m = size(At{1}, 2);
+Amap  = trans.Amap;
+ATmap = trans.ATmap;
+sig = trans.sigma; 
+tau1 = trans.NEWT.tau1;
+tau2 = trans.NEWT.tau2;
+CG_maxit = cgopts.CG_maxit;
+pcgTol = cgopts.CG_tol;
+Lchol = trans.Lchol;
+Fx = Ftz.FX;
+Fy = Ftz.FY;
+rhsx = -Fx;
+rhsy = -Fy;
+%Ftz.par: \Sigma
+
+% D = Ftz.par;
+
+% Dtau2 = ProjJac_ops(D, K, 'affine', - 1 / sig, 1 / sig + tau2); % D^{\tau_2}
+
+% invDtau2 = ProjJac_ops(Dtau2, K, 'affine_inv', 1 , 0); % (D^{\tau_2})^{-1}
+
+
+tmptau = ( 1 + sig*tau2 );
+
+
+
+
+
+iHW = Ftz.par;
+
+for k = 1:trans.nblock
+    iHW.Dsch2{k} = (sig*iHW.Dsch2{k})./(1+tau2*sig-iHW.Dsch2{k});
+    iHW.Dsch2t{k} = iHW.Dsch2{k}';
+    iHW.Dsch1{k} = 1/tau2;
+end
+if trans.barrier == 0
+N24rhsx = DPhi(K, iHW, rhsx);
+else
+N24rhsx = DPhi_barrier(K, iHW, rhsx);
+end
+N24rhsx = Amap(N24rhsx);             %N_2(N_4)^{-1} Fx 
+rhs1 = rhsy - N24rhsx;
+
+% iHWy = D * Dtau2^{-1} * D + sig * D = sig * tmptau * I - sig * tmptau^2 * (D + tmptau * I)^{-1};
+% invDtmptau = ProjJac_ops(D, K, 'affine_inv', 1, tmptau); % (D + tmptau * I)^{-1}
+% iHWy = ProjJac_ops(invDtmptau, K, 'affine', -sig*tmptau^2, sig*tmptau);
+% 
+% iHWy.sig = 1;
+% iHWy.epsilon = tau1;
+
+iHWy = Ftz.par;
+iHWy.sig = 1;
+for k = 1:trans.nblock
+    iHWy.Dsch12{k} = (iHWy.Dsch2{k}.*(1+sig*tau2)*sig)./(1+sig*tau2-iHWy.Dsch2{k});
+    iHWy.Dsch12t{k} = iHWy.Dsch2{k}';
+    iHWy.Dsch1{k} = (1+sig*tau2)/tau2;
+end
+
+iHWy.epsilon = tau1;
+iHWy.K = K;
+
+L = struct();
+% L.invdiagM = trans.invdiagM;
+if strcmp(method, 'iterative')
+%     [dy,relres,flag] = psqmr(@matvec_y, K, At, rhs1, iHWy, L, pcgTol, CG_maxit, Lchol);
+% [dy,relres,flag] = psqmr(@matvec_sdpnaly, K, At, rhs1, iHWy, L, pcgTol, CG_maxit, Lchol);
+% [dy,relres,flag] = psqmr2(@matvec_sdpnaly,blk,At,rhs1,iHWy.Dsch1{1},iHWy,L,pcgTol,CG_maxit,Lchol);
+% [dy,relres,flag] = psqmr_sdpnal2(@matvec_sdpnaly,trans.blk,At,rhs1,iHWy.Dsch1{1},iHWy,L,pcgTol,CG_maxit,Lchol);
+
+
+
+% [V2 eigg2] = eig(mat);
+% [d,ind] = sort(diag(eigg2),'descend');
+% Ds = eigg2(ind,ind);
+% Vs = V(:,ind);
+% mat2 = Vs*Ds*Vs';
+% norm(mat2-mat)
+% 
+% iHWy.epsilon = 0;
+% eigfun = @(y) matvec_y2(K,At,iHWy,y,Lchol);
+% % eigg = eigs(eigfun,1819,[],1819);
+% [eigg] = eigs(eigfun,1200,[],1200,'largestabs','Tolerance',1e-16);
+
+%     schur = sparse(m,m);
+% % iHWy.epsilon = 0;
+% for ii = 1:m
+%     vector = zeros(m,1);
+%     vector(ii,1) = 1;
+%     roww = matvec_y2(K, At, iHWy, vector, Lchol);
+%     schur(:,ii) = roww; 
+% end
+% [V,eigg] = eigs(schur,1819);
+% eigg = diag(eigg);
+% eigg = max(eigg,1e-3);
+% eigg = diag(eigg);
+% schur = real(V*eigg*V');
+% dy = schur \ rhs1;
+if trans.barrier == 0
+[dy,relres,flag] = psqmr2(@matvec_y2,K,At,rhs1,iHWy,L,pcgTol,CG_maxit,Lchol);
+elseif trans.barrier == 1
+[dy,relres,flag] = psqmr2(@matvec_y2_barrier,K,At,rhs1,iHWy,L,pcgTol,CG_maxit,Lchol);
+end
+% dy = 10*dy;
+% iHWy.epsilon = 0;
+
+% % eigg = eigs(eigfun,1819,[],1819);
+% if trans.iter > 10000
+% eigfun = @(y) matvec_y3(K,At,iHWy,y,Lchol);
+% [V,eigg] = eigs(eigfun,length(dy),[],length(dy),'smallestabs','Tolerance',1e-16);
+% trans.eigve = V(:,end-5:end);
+% trans.eigve = trans.eigve*(trans.eigve'*trans.eigve)^(-1)*trans.eigve';
+% trans.dyratio = norm(trans.eigve*dy)/norm(dy);
+% else
+% trans.dyratio = 0;
+% end
+% schur = sparse(m,m);
+% % iHWy.epsilon = 0;
+% for ii = 1:m
+%     vector = zeros(m,1);
+%     vector(ii,1) = 1;
+%     roww = matvec_y2(K, At, iHWy, vector, Lchol);
+%     schur(:,ii) = roww; 
+% end
+% eigg = eigs(schur,1819);
+% plot(eigg)
+
+% %     [dy,relres,flag] = psqmr(@matvec_y,K,At,rhs1,iHWy,L,pcgTol,CG_maxit,Lchol);
+%     1;
+trans.cgres = relres;
+elseif strcmp(method, 'tsvd')
+    eigfun = @(y) matvec_y2(K,At,iHWy,y,Lchol);
+    schur = sparse(m,m);
+% iHWy.epsilon = 0;
+for ii = 1:m
+    vector = zeros(m,1);
+    vector(ii,1) = 1;
+    roww = matvec_y2(K, At, iHWy, vector, Lchol);
+    schur(:,ii) = roww; 
+end
+[V,eigg] = eigs(schur,1819);
+eigg = diag(eigg);
+eigg = max(eigg,1e-3);
+eigg = diag(eigg);
+schur = real(V*eigg*V');
+dy = schur \ rhs1;
+relres = norm(schur*dy - rhs1,'fro')/(1 + norm(rhs1));
+flag = 1;
+trans.cgres = [relres relres];
+elseif strcmp(method, 'direct')
+    %%
+    %% use direct method to solve linear system
+    % lhs* dy = rhs1
+    % lhs = iHWy.sig * Rt^{-1} * S * A * iHWy.Dsch * At * Sinv * R^{-1} + epsilon * I
+    % Sinv * y is equivalent to y(perm) = y
+    % S * y is equivalent to y = y(perm)
+    % lhs * dy = rhs is equivalent to 
+    % (iHWy.sig  * A * iHWy.Dsch * At  + epsilon * Sinv * Rt * R * S) * (Sinv * R^{-1} * dy) = Sinv * Rt * rhs
+
+    % compute RtR = Sinv * Rt * R * S 
+%     if ~isfield(Lchol, 'RtR')
+%         Lchol.RtR = Lchol.Rt * Lchol.R;
+%         Lchol.RtR(Lchol.perm, Lchol.perm) = Lchol.RtR;
+%         % Rperm = Lchol.R(:, Lchol.perm);
+%         % Lchol.RtR = Rperm' * Rperm;
+%     end
+
+% eigfun = @(y) matvec_y2(K,At,iHWy,y,Lchol);
+% eigg = eigs(eigfun,1819,[],1819);
+% [V eigg] = eigs(eigfun,1819,[],1819,'largestabs','Tolerance',1e-14);
+% mat = V*eigg*V';
+% dy = real(mat)\rhs1;
+% trans.cgres = [0 0];
+% flag = 1;
+% relres = [1, 1];
+
+
+[dy,relres,flag] = cholssncp(K,At,rhs1,iHWy,L,pcgTol,Lchol);
+
+
+    % compute lhs = iHWy.sig * A * iHWy.Dsch * At  + epsilon * Sinv * Rt * R * S
+%     par = iHWy;
+%     AHAt = linsysinit(At, 'sparse');
+%     for p =1: length(K)
+%         cone = K{p};
+%         if strcmp(cone.type, 's')
+% 
+%         elseif strcmp(cone.type, 'q')
+%             if (~isempty(par.Dsch2{p}))
+%                 H = struct;
+%                 H.diag = repelem(par.shift{p}, cone.size, 1);  
+%                 H.lr = [blk_spdiag(par.P1{p}, cone.size), blk_spdiag(par.P2{p}, cone.size)];
+%                 H.coeff = [par.Dsch1{p}; par.Dsch2{p}];
+%                 AHAt = linsysconstruct_cone_q(AHAt, cone.size, At{p}, H, 'sparse') ;
+%             end    
+%         elseif strcmp(cone.type, 'l')
+%             if (~isempty(par.Dsch2{p}))
+%                 AHAt.mat11 = AHAt.mat11 + At{p}' * spdiag(par.Dsch2{p}) * At{p};
+%                 %AorgDAt = AorgDAt + trans.Atorg{p}' * spdiag(par.Dsch2{p}) * trans.Atorg{p};
+%             end
+%         elseif strcmp(cone.type, 'u')
+%         
+%         end
+%     end
+% 
+%     AHAt.mat11 = par.sig * AHAt.mat11;
+%     AHAt.mat11 = AHAt.mat11 + par.epsilon * Lchol.RtR;
+%     AHAt = linsysconcat(AHAt, 'sparse');
+%     
+%     % compute rhs1_temp = Sinv * Rt * rhs1
+%     rhs1_temp = zeros(size(rhs1));
+%     rhs1_temp(Lchol.perm) = Lchol.Rt * rhs1;
+% 
+%     rhs1_temp = [rhs1_temp; zeros(AHAt.dim2 + AHAt.dim3, 1)];
+% 
+%     % solve lhs * ( Sinv * R^{-1} * dy) = rhs
+%     dy = AHAt.mat \ rhs1_temp;
+%     dy = dy(1: AHAt.dim1) ;
+% 
+%     % print dim1, dim2, dim3
+%     % fprintf("dim1: %d, dim2: %d, dim3: %d", AHAt.dim1, AHAt.dim2, AHAt.dim3);
+% 
+%     % recover dy 
+%     dy = Lchol.R * dy(Lchol.perm);
+
+    % check residual
+    relres = norm(rhs1 - matvec_y2(K, At, iHWy, dy, Lchol) ) / (1 + norm(rhs1));
+    trans.cgres = [relres relres];
+    % fprintf("resdue of computing dy: %e\n", relres);
+%     flag = 1;
+end
+
+
+%%
+
+
+trans.flag = flag;
+trans.cgiter = length(relres);
+
+if trans.barrier == 0
+rhs2 = ATmap(dy);
+rhs2 = DPhi(K, Ftz.par, rhs2);
+rhs2 = rhs2 + rhsx ;
+rhs2 = rhs2 / tmptau;
+% iHWx = ProjJac_ops(D, K, 'affine_inv', - 1 / (sig * tmptau), - 1 / sig); % - (tmptau * D^{\tau_2})^{-1}
+
+% dx= DPhi(K, iHWx, rhs2) ;
+
+iHWx = Ftz.par;
+for k = 1:trans.nblock
+    iHWx.Dsch2{k} = (iHWx.Dsch2{k}*sig)./(1+sig*tau2-iHWx.Dsch2{k});
+    iHWx.Dsch2t{k} = iHWx.Dsch2{k}';
+    iHWx.Dsch1{k} = 1/tau2;
+end
+%     dx= DPhi_sdpnalN4T(blk,iHWx,rhs2,sig,tau);
+dx= DPhi(K,iHWx,rhs2);
+
+for k = 1:trans.nblock
+    dx{k} = dx{k} + sig * rhs2{k};
+end
+
+elseif trans.barrier == 1
+
+rhs2 = ATmap(dy);
+rhs2 = DPhi_barrier(K, Ftz.par, rhs2);
+rhs2 = rhs2 + rhsx ;
+
+
+iHWx = Ftz.par;
+for k = 1:trans.nblock
+    iHWx.Dsch2{k} = sig./(1+sig*tau2-iHWx.Dsch2{k});
+    iHWx.Dsch2t{k} = iHWx.Dsch2{k}';
+    iHWx.Dsch1{k} = 1/tau2;
+end
+
+dx= DPhi_barrier(K,iHWx,rhs2);
+end
+% for k = 1:trans.nblock
+%     dx{k} = dx{k} + sig * rhs2{k};
+% end
+% % original code
+% rhs2 = rhs2 - Fx ;
+% rhs2 = rhs2 / (1 + sig * tau2);
+% % iHWx: T
+% iHWx = D;
+% for p =1: length(K)
+%     cone = K{p};
+%     if strcmp(cone.type, 's')
+%         iHWx.Dsch2{p} = (sig * D.Dsch2{p} )./ (1 + sig * tau2 - D.Dsch2{p} );
+%         iHWx.Dsch1{p} = 1 / tau2;
+%         iHWx.shift{p} = sig;
+%     end
+% end
+% dx_= DPhi(K, iHWx, rhs2);
+
+% norm(dx - dx_);
+
+
+
+%% check residual of newton system wrt [dx; dy]
+if trans.barrier == 0
+D_lmut = @(x) DPhi(K, Ftz.par, x);
+Atdy = ATmap(dy);
+N1dy = sig * Amap(D_lmut(Atdy)) + tau1 * dy;
+N2dx = Amap(DPhi(K, Ftz.par, dx));
+N3dy = - D_lmut(Atdy) ;
+N4dx = (1 / sig + tau2) * dx - 1 / sig * D_lmut(dx);
+
+elseif trans.barrier == 1
+D_lmut = @(x) DPhi_barrier(K, Ftz.par, x);
+Atdy = ATmap(dy);
+N1dy = sig * Amap(D_lmut(Atdy)) + tau1 * dy;
+N2dx = Amap(DPhi_barrier(K, Ftz.par, dx));
+N3dy = - D_lmut(Atdy) ;
+N4dx = (1 / sig + tau2) * dx - 1 / sig * D_lmut(dx);
+end
+resy = N1dy + N2dx + Fy;
+resx = N3dy + N4dx + Fx;
+trans.newton_res = sqrt(norm(resy) ^ 2 + norm(resx) ^ 2) / (1 + sqrt(norm(rhsy) ^ 2 + norm(rhsx) ^ 2)) ;
+% 
+% 
+% trans.newton_res = -1;
+
+
+end

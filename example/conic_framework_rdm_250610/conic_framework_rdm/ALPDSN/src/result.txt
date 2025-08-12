@@ -1,0 +1,10 @@
+
+500y111mu_update_itr101e-6mu_fact1.5时间的几何平均值为:4.386,gamm1的值为0.5,gamm2的值为0.7
+
+500y111mu_update_itr101e-6mu_fact1.5时间的几何平均值为:1.563,gamm1的值为0.5,gamm2的值为0.7
+
+500y111mu_update_itr101e-6mu_fact1.5时间的几何平均值为:1.569,gamm1的值为0.5,gamm2的值为0.7
+
+500y111mu_update_itr101e-6mu_fact1.5时间的几何平均值为:24.886,gamm1的值为0.5,gamm2的值为0.7
+
+500y111mu_update_itr101e-6mu_fact1.5时间的几何平均值为:1.552,gamm1的值为0.5,gamm2的值为0.7
