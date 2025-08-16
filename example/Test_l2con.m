@@ -16,26 +16,23 @@ fname{10} = 'mpg_scale_expanded7';
 fname{11} = 'space_ga_scale_expanded9';
 fname{12} = 'E2006.train';
 %% QP
-for i =1% 1  3 11 12
+for i =1
     probname = [datadir,filesep,fname{i}];
     fprintf('\n Problem name: %s \n', fname{i});
     load([probname,'.mat'])
-
     [m,n] = size(A);
     Bt = A';
 
 
 
-
+    %% opts setting
     opts.sigx4l = 0.5;
     opts.sigx4m = 0.5;
     opts.sigx4u = 0.5;
-
-
     x0 = zeros(m,1);
     At = A';
 
-    opts.t_adap = 0;
+    %% pblk setting
     [m ,n]=size(A);
     pblk{1} = struct;
     pblk{1}.type = 'l1';
@@ -44,7 +41,7 @@ for i =1% 1  3 11 12
     Bt = eye(n);
     pblk{1}.coefficient = 1;
 
-
+    %% f setting
     f{1} = struct;
     f{1}.type = 'l2con';
     f{1}.size = n;
@@ -55,11 +52,12 @@ for i =1% 1  3 11 12
     f{1}.shift = b;
 
 
-    
+    %% solve
      [xopt, out] = SSNCVX(x0,pblk,Bt,f,[],[],[],[],[],[],[],opts);
+
+
      x02{1,1} = x0;
      x02{2,1} = x0;
-     1;
      pblk2{1,1} = pblk{1};
      pblk2{2,1} = pblk{1};
      Bt2{1,1} = Bt;

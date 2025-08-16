@@ -30,7 +30,7 @@ fname{22} = 'Portfolio8';
 seed = 2024;
 rng(seed);
 for i = 16%
-    %% load data
+    %% Load data
     probname = [datadir,filesep,fname{i}];
     fprintf('\n Problem name: %s \n', fname{i});
     if exist([probname,'.mat'])
@@ -52,7 +52,7 @@ for i = 16%
 
 
 
-
+    %% opts setting
     opts.resmin = 0.05;
     opts.m = length(b);
     opts.sigx3l = 0.5;
@@ -63,8 +63,7 @@ for i = 16%
     opts.sigx4u = 0.5;
 
 
-
-
+    %% pblk setting
     x0 = zeros(m,1);
     At = {A'};
     [m ,n]=size(A);
@@ -81,19 +80,16 @@ for i = 16%
 
 
     lb = b;
-    ub = 2*b;
+    ub = b;
     try
         Q= full(Q.Qmat);
     end
+    %% f setting
     f{1} = struct;
     f{1}.type = 'square';
     f{1}.size = n;
     f{1}.coefficient = 0.5;
 
-    opts.cgmin = 50;
-    opts.cgmed = 300;
-    opts.method = 'iterative';
-    opts.cgmax = 300;
 
     [xopt, out] = SSNCVX(x0,pblk,[],f,[],C,l,u,At,lb,ub,opts);
 

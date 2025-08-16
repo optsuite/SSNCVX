@@ -48,26 +48,27 @@ for i = 12
     C = cell(1);
     C{1} = randn(size(A,2),1);
     x0 = zeros(m,1);
+    %% opts setting
     opts = struct();
     opts.sigx4l = 0.5;
     opts.sigx4m = 0.5;
     opts.sigx4u = 0.5;
     At = {A'};
-
     [m ,n]=size(A);
+
+    %% pblk setting
     pblk{1} = struct;
     pblk{1}.type = 'l1';
     pblk{1}.size = n;
     pblk{1}.coefficient = 1;
-    pblk{1}.coefficient2 = 2;
 
 
-
+    %% f setting
     f{1} = struct;
     f{1}.type = 'exp';
     f{1}.size = n;
     f{1}.coefficient = 1;
-
+    %% solve
     [xopt, out] = SSNCVX([],pblk,[],f,[],[],[],[],[],[],[],opts);
 
      pblk2{1,1} = pblk{1};

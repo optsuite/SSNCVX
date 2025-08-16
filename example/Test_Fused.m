@@ -34,15 +34,13 @@ for i = 12
 
 
 
-
+    %% opts setting
     opts.lambda = 20;
     opts.resmin = 500;
     opts.sigma = 30;
     opts.linratio = 0.5;
     opts.lfactor = 0.98;
     opts = deflalt_opts(crho,i);
-
-
     opts.sigma = 1/opts.sigma;
     opts.sigzm = opts.sigzl;
     opts.sigzu = opts.sigzl;
@@ -53,7 +51,7 @@ for i = 12
 
     x0 = zeros(m,1);
 
-
+    %% pblk setting
     [m ,n]=size(A);
     pblk{1} = struct;
     pblk{1}.type = 'fused';
@@ -66,7 +64,7 @@ for i = 12
     pblk{1}.Binput.Bmap = Bmap;
     pblk{1}.Binput.BTmap = BTmap;
 
-
+    %% f setting
     f{1} = struct;
     f{1}.type = 'square';
     f{1}.size = n;

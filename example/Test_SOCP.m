@@ -3,13 +3,11 @@ clc;
 root_dir = '../..';
 test_dir = '..';
 addpath([root_dir]);
-% startup(root_dir);
 addpath(genpath(test_dir));
 dir_results = "../results";
 
 dir_data = "../data/"
 dir_logs = 'logs';
-
 
 dataset = "DIMACS";
 probnames = ["nb", "nb_L1", "nb_L2", "nb_L2_bessel", "nql180", "nql30", "nql60", "qssp180", "qssp30", "qssp60", "sched_100_100_orig", "sched_100_100_scaled", "sched_100_50_orig", "sched_100_50_scaled", "sched_200_100_orig", "sched_200_100_scaled", "sched_50_50_orig", "sched_50_50_scaled"];
@@ -19,7 +17,7 @@ save_root = strcat(dir_results,'/' ,dataset);
 table_str = [];
 timegeo = [];
 file_len = length(probnames);
-for i = 3% 1  3 11 12
+for i = 3
     %% load data
     probname = probnames{i};
     model = SOCPdata2model(dataset,probname,dir_data);
@@ -37,7 +35,7 @@ for i = 3% 1  3 11 12
 
 
     
-
+    %% opts setting
     opts.method = 'direct';
     opts.sigx4l = 0.4;
     opts.sigx4m = 0.4;
@@ -48,7 +46,7 @@ for i = 3% 1  3 11 12
     opts.t_adap = 0;
     [m ,n]=size(A);
 
-
+    %% pblk setting
     for i = 1:length(K)
         pblk{i,1} = struct;
         pblk{i,1}.type = K{i}.type;
@@ -58,9 +56,6 @@ for i = 3% 1  3 11 12
 
     lb = b;
     ub = b;
-    opts.cgmin = 50; 
-    opts.cgmed = 700;
-    opts.cgmax = 700; 
     opts.K = K;
     opts.m = length(b);
 

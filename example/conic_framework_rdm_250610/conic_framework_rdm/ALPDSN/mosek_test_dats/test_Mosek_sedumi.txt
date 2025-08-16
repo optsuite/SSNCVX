@@ -1,1 +1,0 @@
-prob	m	n	X_rank	S_rank	pinf	dinf	gap	iter	time	status

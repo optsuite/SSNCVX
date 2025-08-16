@@ -24,7 +24,6 @@ for i = 10
     C = model.C;
     Amap  = @(x) A*x;
     ATmap = @(x) A'*x;
- 
     opts.gtol = 1e-6;
     K = model.K;
     At = model.At;
@@ -58,7 +57,6 @@ for i = 10
 
      [xopt, out] = SSNCVX([],pblk,[],[],[],C,[],[],At,lb,ub,opts);
 
-     1;
      pblk2{1,1} = pblk{1};
      pblk2{2,1} = pblk{1};
      At2{1,1} = At{1};
@@ -74,12 +72,3 @@ for i = 10
 end
 out.totaltime
 
-
-
-% function data = prepare_cache_ARNT(data, A,opts)
-% y1 = data.YP; z1 = data.XP;
-% data.Bx = -opts.ATmap(y1);
-% if A == 1
-%     data.BTz = -opts.Amap(z1);
-% end
-% end

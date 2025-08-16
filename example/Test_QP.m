@@ -49,13 +49,11 @@ for i = 1:length(fname)% 1  3 11 12
 
     %%
 
-    stoptol = 1e-4;%stopping tol
     tol = 1e-5;
-    opts.maxits =  10000
+    opts.maxits =  10000;
     opts.maxtime = 10000;
     opts.solver = 1; 
     opts.record = 1;
-    opts.sigma = 1;
 
 
     opts.Amap = @(x) Amap(x);
@@ -66,26 +64,13 @@ for i = 1:length(fname)% 1  3 11 12
     opts.maxit = 100000;
     opts.resmin = 0.05;
     opts.tol = 1e-6;
-    opts.b = b;
-    opts.lambda = lambda;
+
     opts.m = m;
 
 
     opts.linratio = 0.5;
     opts.lfactor = 0.98;
 
-    opts.sigyl = 1;
-    opts.sigym = 1;
-    opts.sigyu = 1;
-    opts.sigzl = 1;
-    opts.sigzm = 1;
-    opts.sigzu = 1;
-    opts.sigrl = 1;
-    opts.sigrm = 1;
-    opts.sigru = 1;
-    opts.sigvl = 1;
-    opts.sigvm = 1;
-    opts.sigvu = 1;
 
     opts.sigx1l = 0.5;
     opts.sigx1m = 0.5;

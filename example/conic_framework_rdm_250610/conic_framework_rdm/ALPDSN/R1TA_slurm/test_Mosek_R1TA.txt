@@ -1,1 +1,0 @@
-problem           primfeasorg       dualfeasorg      relative_gap      iter         time   status

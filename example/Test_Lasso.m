@@ -38,7 +38,7 @@ for i = 1% 1  3 11 12
 
 
 
-
+    %% opts setting
     opts = defalut_opts(crho,i);
     opts.lambda = 10;
     opts.sigma = 1/opts.sigma;
@@ -51,8 +51,7 @@ for i = 1% 1  3 11 12
     x0 = zeros(m,1);
 
     At = A';
-
-    opts.t_adap = 0;
+    %% pblk setting
     [m ,n]=size(A);
     pblk{1} = struct;
     pblk{1}.type = 'l1';
@@ -62,14 +61,12 @@ for i = 1% 1  3 11 12
 
 
 
-
+    %% f setting
     f{1} = struct;
     f{1}.type = 'square';
     f{1}.size = n;
     f{1}.coefficient = 0.5;
     f{1}.shift = -b;
-
-
     opts.method = 'direct';
 
     

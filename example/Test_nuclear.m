@@ -38,13 +38,7 @@ for i = 1:8
     sampling_matrix = reshape(shuffled_vec, [size(noi_image,1), size(noi_image,2)]);
 
     [n1,n2] = size(noi_image);
-    stoptol = 1e-4;
-    tol = 1e-4;
  
-
-
-
-
     opts.tol = 1e-3;
     
     if exist('b','var')
@@ -52,7 +46,7 @@ for i = 1:8
     end
     x0 = zeros(n1,n2,1);
 
-    
+    %% opts setting
     opts.sigyl = 0.6;
     opts.sigym = 0.6;
     opts.sigyu = 0.8;
@@ -62,7 +56,7 @@ for i = 1:8
     opts.sigx4u = 0.51;
     opts.adaplambda = 1;
 
-
+    %% pblk setting
     pblk{1} = struct;
     pblk{1}.type = 'nuclear';
     pblk{1}.size = [n1,n2];
@@ -71,17 +65,13 @@ for i = 1:8
     B.Bmap = @(u) sampling_matrix.*u;
     B.BTmap = @(y) sampling_matrix.*y;
     B.out_size = [n1, n2];
-    %% f
+    %% f setting
     f{1} = struct;
     f{1}.type = 'square';
     f{1}.size = [2*n1,n2];
     f{1}.coefficient = 1;
     f{1}.shift = noi_image;
 
-    opts.cgmin = 50;
-    opts.cgmed = 300;
-    opts.method = 'iterative';
-    opts.cgmax = 300;
 
      [xopt, out] = SSNCVX(x0,pblk,B,f,[],[],[],[],[],[],[],opts);
 

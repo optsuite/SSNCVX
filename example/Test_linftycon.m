@@ -9,7 +9,7 @@ for i =1% 1  3 11 12
 
 
 
-
+    %% opts setting
     opts.sigx4l = 0.5;
     opts.sigx4m = 0.5;
     opts.sigx4u = 0.5;
@@ -17,13 +17,15 @@ for i =1% 1  3 11 12
     x0 = zeros(m,1);
     At = A';
     [m ,n]=size(A);
+
+    %% pblk setting
     pblk{1} = struct;
     pblk{1}.type = 'l1';
     pblk{1}.size = n;
     Bt = eye(n);
     pblk{1}.coefficient = 1;
 
-
+    %% f setting
     f{1} = struct;
     f{1}.type = 'linftycon';
     f{1}.size = n;

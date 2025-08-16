@@ -29,32 +29,33 @@ for i = 1
     At = model.At;
 
 
-
+    %% opts setting
     opts.sigx4l = 0.4;
     opts.sigx4m = 0.4;
     opts.sigx4u = 0.5;
     opts.cgratio = 0.01;
-
     opts.lambda = 5;
-
     opts.muopts.mu_update_itr = 12;
     opts.muopts.mu_fact = 1.5;
-
     [m ,n] = size(A);
+
+    %% pblk setting
     pblk{1} = struct;
     pblk{1}.type = 's';
     pblk{1}.size = size(C{1},1);
     pblk{1}.coefficient = 1;
+    opts.K = K;
+    opts.m = length(b);
+    opts.fap = 1;
+
     l = L;
     u = U;
-
     lb = b;
     ub = b;
 
-    opts.K = K;
-    opts.m = length(b);
 
-    opts.fap = 1;
+
+    %% solve
     [xopt, out] = SSNCVX([],pblk,[],[],[],C,l,u,At,lb,ub,opts);
 
      pblk2{1,1} = pblk{1};

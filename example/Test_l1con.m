@@ -22,14 +22,15 @@ for i =1%
 
     [m,n] = size(A);
     Bt = A';
+    %% opts setting
     opts.sigx2l = 0.5;
     opts.sigx2m = 0.5;
     opts.sigx2u = 0.5;
     opts.resratio = 1e-4;
     x0 = zeros(m,1);
     At = A';
-
-    opts.t_adap = 0;
+    
+    %% pblk setting
     [m ,n]=size(A);
     pblk{1} = struct;
     pblk{1}.type = 'l1';
@@ -38,7 +39,7 @@ for i =1%
     Bt = eye(n);
     pblk{1}.coefficient = 1;
 
-
+    %% f setting
     f{1} = struct;
     f{1}.type = 'l1con';
     f{1}.size = n;
@@ -49,13 +50,7 @@ for i =1%
     f{1}.shift = b;
 
 
-
-
-    opts.cgmin = 50;
-    opts.cgmed = 300;
-    opts.method = 'iterative';
-    opts.cgmax = 300;
-    
+    %% solve
      [xopt, out] = SSNCVX(x0,pblk,Bt,f,[],[],[],[],[],[],[],opts);
      x02{1,1} = x0;
      x02{2,1} = x0;
@@ -66,7 +61,6 @@ for i =1%
      f2{1,1} = f{1};
      f2{2,1} = f{1};
      [xopt, out] = SSNCVX(x02,pblk2,Bt2,f2,[],[],[],[],[],[],[],opts);
-
      norm(Bt'*xopt.var{1} + b,2)
 
 end

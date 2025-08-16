@@ -52,7 +52,7 @@ for i = 12% 1  3 11 12
 
 
 
-
+    %% opts setting
     opts.resmin = 0.05;
     opts.cgratio = 0.1;
     opts.cgtol = 1e-7;
@@ -71,7 +71,7 @@ for i = 12% 1  3 11 12
     C = {A*A'};
 
 
-    opts.t_adap = 0;
+    %% pblk setting
     [m ,n]=size(A);
     pblk{1} = struct;
     pblk{1}.type = 'l1';
@@ -84,6 +84,8 @@ for i = 12% 1  3 11 12
     try
         Q= full(Q.Qmat);
     end
+
+    %% f setting
     f{1} = struct;
     f{1}.type = 'logdet';
     f{1}.size = n;
@@ -95,7 +97,8 @@ for i = 12% 1  3 11 12
    
     [xopt, out] = SSNCVX(x0,pblk,[],f,[],C,[],[],[],[],[],opts);
 
-         pblk2{1,1} = pblk{1};
+    %% pblk setting 
+     pblk2{1,1} = pblk{1};
      pblk2{2,1} = pblk{1};
 
      C2{1,1} = C{1};
@@ -111,10 +114,3 @@ for i = 12% 1  3 11 12
 end
 out.totaltime
 
-% function data = prepare_cache_ARNT(data, A,opts)
-% y1 = data.YP; z1 = data.XP;
-% data.Bx = -opts.ATmap(y1);
-% if A == 1
-%     data.BTz = -opts.Amap(z1);
-% end
-% end

@@ -32,7 +32,7 @@ for i = [ 1] %1 2 3 4 5 6 7 11 12 13
     nrmC = norm(model.C);
     C = {-model.C/nrmC};
 
-
+    %% opts setting
     opts.adaplambda = 1;
 
 
@@ -40,6 +40,7 @@ for i = [ 1] %1 2 3 4 5 6 7 11 12 13
 
 
     [m ,n]=size(A);
+    %% pblk setting   
     pblk{1} = struct;
     pblk{1}.type = 's';
     pblk{1}.size = size(C{1},1);
@@ -50,7 +51,7 @@ for i = [ 1] %1 2 3 4 5 6 7 11 12 13
     ub = b;
     opts.K = K;
     opts.m = length(b);
-
+    %% f setting   
     f{1} = struct;
     f{1}.type = 'l1';
     f{1}.size = n;

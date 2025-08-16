@@ -65,10 +65,6 @@ for i = [6]
     end
     b = model.b;
     opts.m = length(b);
-
-
-
-
     kk = length(model.K);
     lenk = 0;
     modeltmp = model;

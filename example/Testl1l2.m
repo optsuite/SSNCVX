@@ -31,17 +31,12 @@ for i = 3
     lambda=crho*lambdamax;
     stoptol = 1e-4;
     tol = 1e-6;
- 
+    %% opts setting
     opts.maxits =  10000;
     opts.maxtime = 10000;
-
     opts.Amap = @(x) Amap(x);
     opts.ATmap = @(x) ATmap(x);
-
-
-
     x0 = zeros(m,1);
-
     opts.sigx4l = 0.5;
     opts.sigx4m = 0.5;
     opts.sigx4u = 0.5;
@@ -49,12 +44,13 @@ for i = 3
 
     x0 = zeros(m,1);
     [m ,n]=size(A);
+    %% pblk setting
     pblk{1} = struct;
     pblk{1}.type = 'l1l2';
     pblk{1}.size = [n,2];
     pblk{1}.coefficient = lambda;
 
-
+    %% f setting
     f{1} = struct;
     f{1}.type = 'square';
     f{1}.size = n;

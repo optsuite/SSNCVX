@@ -29,7 +29,7 @@ for i =1
 
     
 
-
+    %% opts setting
     opts.sigx4l = 0.5;
     opts.sigx4m = 0.5;
     opts.sigx4u = 0.5;
@@ -38,6 +38,8 @@ for i =1
     x0 = zeros(m,1);
     At = A';
     [m ,n]=size(A);
+
+    %% pblk setting
     pblk{1} = struct;
     pblk{1}.type = 'l1';
     pblk{1}.topk = 5;
@@ -45,7 +47,7 @@ for i =1
     Bt = eye(n);
     pblk{1}.coefficient = 1;
 
-
+    %% f setting
     f{1} = struct;
     f{1}.type = 'l2con2';
     f{1}.size = n;
@@ -114,7 +116,6 @@ function [value, genD] = prox(X,coefficient,sigma)
 end
 
 function [value] = dobj(X,pblk)
-
 if isfield(pblk,'shift')
     value =  dot_ssn(pblk.shift,X) + pblk.coefficient*norm(X,2);
 else
