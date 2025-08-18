@@ -10,6 +10,9 @@
 ## Problem Formulation
 
 SSNCVX is a general algorithmic framework for solving the following convex composite optimization problem:
+
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
 $$
 \begin{aligned}
 \min_{\mathbf{x}} \quad & p(\mathbf{x}) + f(\mathcal{B}(\mathbf{x})) + \langle \mathbf{c}, \mathbf{x} \rangle + \frac{1}{2} \langle \mathbf{x}, \mathcal{Q}(\mathbf{x}) \rangle, \\
