@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ## SSNCVX
 
 - SSNCVX (**S**emi-**S**mooth **N**ewton method for **C**on**v**e**x** optimization) is both the name of **our software package** and the **underlying algorithmic framework**.
@@ -811,3 +812,6 @@ If you use SSNCVX in your research, please cite [this paper](#).
 If you want to contact us for collaboration or other inquiries, please reach out via email at [to_be_determined@pku.edu.cn]
 
 
+=======
+# SSNCVX
+>>>>>>> e1666d73c4c9dc5472e9b0bb7ce03fae4cb92407
