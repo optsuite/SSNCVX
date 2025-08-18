@@ -32,22 +32,22 @@ Here we list some examples of the problem.
 
 | Problem | Objective Function | Constraints | Function block |
 |---------|--------------------|-------------|----------------|
-|  | $\underbrace{\langle \bm{c},\bm{x} \rangle}_{\text{(I)}} + \underbrace{\frac{1}{2}\langle \bm{x},\mathcal{Q}(\bm{x}) \rangle}_{\text{(II)}} + \underbrace{f(\mathcal{B}(\bm{x}))}_{\text{(III)}} + p(\bm{x})$ | $\underbrace{\bm{x} \in \mathcal{P}_1}_{\text{(IV)}}$, $\underbrace{\mathcal{A}(\bm{x}) \in \mathcal{P}_2}_{\text{(V)}}.$ | (I) (II) (III) (IV) (V) |
-| LP | $\langle \bm{c},\bm{x} \rangle $ | $\mathcal{A}(\bm{x}) = \bm{b},  \bm{x} \ge 0$ | (I)(V) |
-| SOCP | $\langle \bm{c},\bm{x} \rangle$ | $\mathcal{A}(\bm{x}) = \bm{b},  \bm{x} \in \mathcal{Q}^n$ | (I)(V) |
-| SDP | $\langle \bm{C},\bm{X} \rangle$ | $\mathcal{A}(\bm{X}) = \bm{b},  \bm{X} \succeq 0$ | (I)(V) |
-| SDP with box constraints | $\langle \bm{C},\bm{X} \rangle $ | $\mathcal{A}(\bm{X}) = \bm{b},  \bm{x} \in \mathcal{P}_1, \bm{X} \succeq 0$ | (I)(IV)(V) |
-| QP | $\langle \bm{x},\mathcal{Q}(\bm{x}) \rangle + \langle \bm{x},\bm{c}\rangle$ | $\texttt{l} \le \bm{x} \le \texttt{u}, \mathcal{A}(\bm{x}) = \bm{b}$ | (I)(II)(IV)(V) |
-| QP with $\ell_1$ norm | $\langle \bm{x},\mathcal{Q}(\bm{x}) \rangle + \lambda \|\|\bm{x}\|\|_1$ | $\texttt{l} \le \bm{x} \le \texttt{u}, \mathcal{A}(\bm{x}) = \bm{b}$ | (I)(II)(III)(V) |
-| Lasso | $\frac{1}{2}\|\|\mathcal{B}(\bm{x})-\bm{b}\|\|^2+ \lambda \|\|\bm{x}\|\|_1$ | - | (III) |
-| Fused Lasso | $\frac{1}{2}\|\|\mathcal{B}(\bm{x})-\bm{b}\|\|^2 + \lambda_1 \|\|\bm{x}\|\|_1 + \lambda_2\|\|D\bm{x}\|\|_1$ | - | (III) |
-| Group Lasso | $\frac{1}{2}\|\|\mathcal{B}(\bm{x})-\bm{b}\|\|^2+ \lambda \|\|\bm{x}\|\|_1$ |- | (III) |
-| Top-k Lasso | $\frac{1}{2}\|\|\mathcal{B}(\bm{x})-\bm{b}\|\|^2 +  \lambda \sum_{i=1}^k \bm{x}_{[i]} $ |- | (III) |
-| Low-rank matrix recovery | $\|\|\mathcal{B}(\bm{X}) - \bm{B}\|\|^2 + \lambda \|\|\bm{X}\|\|_*$ | - | (III) |
-| Sparse covariance matrix estimation | $- \log(\text{det}(\bm{X})) + \text{tr}(\bm{XS}) + \lambda \|\|\bm{X}\|\|_*$ | - | (I)(III) |
-| Sparse PCA | $- \langle \bm{L},\bm{x} \rangle + \lambda \|\|\bm{x}\|\|_1$ | $\text{tr}(\bm{x}) =1, \bm{x} \succeq 0$ | (III) |
-| Basis pursuit | $\|\|\bm{x}\|\|_1$ | $ \mathcal{A}(\bm{x}) = \bm{b} $ | (V) |
-| Robust PCA | $\|\|\bm{x}_1\|\|_* + \lambda \|\|\bm{x}_2\|\|_1$ | $ \bm{x}_1 + \bm{x}_2 = \bm{D} $ | (III)(V) |
+|  | $\underbrace{\langle \mathbf{c},\mathbf{x} \rangle}_{\text{(I)}} + \underbrace{\frac{1}{2}\langle \mathbf{x},\mathcal{Q}(\mathbf{x}) \rangle}_{\text{(II)}} + \underbrace{f(\mathcal{B}(\mathbf{x}))}_{\text{(III)}} + p(\mathbf{x})$ | $\underbrace{\mathbf{x} \in \mathcal{P}_1}_{\text{(IV)}}$, $\underbrace{\mathcal{A}(\mathbf{x}) \in \mathcal{P}_2}_{\text{(V)}}.$ | (I) (II) (III) (IV) (V) |
+| LP | $\langle \mathbf{c},\mathbf{x} \rangle $ | $\mathcal{A}(\mathbf{x}) = \mathbf{b},  \mathbf{x} \ge 0$ | (I)(V) |
+| SOCP | $\langle \mathbf{c},\mathbf{x} \rangle$ | $\mathcal{A}(\mathbf{x}) = \mathbf{b},  \mathbf{x} \in \mathcal{Q}^n$ | (I)(V) |
+| SDP | $\langle \mathbf{C},\mathbf{X} \rangle$ | $\mathcal{A}(\mathbf{X}) = \mathbf{b},  \mathbf{X} \succeq 0$ | (I)(V) |
+| SDP with box constraints | $\langle \mathbf{C},\mathbf{X} \rangle $ | $\mathcal{A}(\mathbf{X}) = \mathbf{b},  \mathbf{x} \in \mathcal{P}_1, \mathbf{X} \succeq 0$ | (I)(IV)(V) |
+| QP | $\langle \mathbf{x},\mathcal{Q}(\mathbf{x}) \rangle + \langle \mathbf{x},\mathbf{c}\rangle$ | $\texttt{l} \le \mathbf{x} \le \texttt{u}, \mathcal{A}(\mathbf{x}) = \mathbf{b}$ | (I)(II)(IV)(V) |
+| QP with $\ell_1$ norm | $\langle \mathbf{x},\mathcal{Q}(\mathbf{x}) \rangle + \lambda \|\|\mathbf{x}\|\|_1$ | $\texttt{l} \le \mathbf{x} \le \texttt{u}, \mathcal{A}(\mathbf{x}) = \mathbf{b}$ | (I)(II)(III)(V) |
+| Lasso | $\frac{1}{2}\|\|\mathcal{B}(\mathbf{x})-\mathbf{b}\|\|^2+ \lambda \|\|\mathbf{x}\|\|_1$ | - | (III) |
+| Fused Lasso | $\frac{1}{2}\|\|\mathcal{B}(\mathbf{x})-\mathbf{b}\|\|^2 + \lambda_1 \|\|\mathbf{x}\|\|_1 + \lambda_2\|\|D\mathbf{x}\|\|_1$ | - | (III) |
+| Group Lasso | $\frac{1}{2}\|\|\mathcal{B}(\mathbf{x})-\mathbf{b}\|\|^2+ \lambda \|\|\mathbf{x}\|\|_1$ |- | (III) |
+| Top-k Lasso | $\frac{1}{2}\|\|\mathcal{B}(\mathbf{x})-\mathbf{b}\|\|^2 +  \lambda \sum_{i=1}^k \mathbf{x}_{[i]} $ |- | (III) |
+| Low-rank matrix recovery | $\|\|\mathcal{B}(\mathbf{X}) - \mathbf{B}\|\|^2 + \lambda \|\|\mathbf{X}\|\|_*$ | - | (III) |
+| Sparse covariance matrix estimation | $- \log(\text{det}(\mathbf{X})) + \text{tr}(\mathbf{XS}) + \lambda \|\|\mathbf{X}\|\|_*$ | - | (I)(III) |
+| Sparse PCA | $- \langle \mathbf{L},\mathbf{x} \rangle + \lambda \|\|\mathbf{x}\|\|_1$ | $\text{tr}(\mathbf{x}) =1, \mathbf{x} \succeq 0$ | (III) |
+| Basis pursuit | $\|\|\mathbf{x}\|\|_1$ | $ \mathcal{A}(\mathbf{x}) = \mathbf{b} $ | (V) |
+| Robust PCA | $\|\|\mathbf{x}_1\|\|_* + \lambda \|\|\mathbf{x}_2\|\|_1$ | $ \mathbf{x}_1 + \mathbf{x}_2 = \mathbf{D} $ | (III)(V) |
 
 ## Algorithms
 
@@ -55,8 +55,8 @@ Here we list some examples of the problem.
 
 $$
 \begin{aligned}
-    &\min_{\bm{y},\bm{z},\bm{s},\bm{r},\bm{v}}  \quad  \delta_{\mathcal{P}_2}^*(-\bm{y}) + f^*(\bm{-z}) +  p^*(-\bm{s}) + \frac{1}{2} \left< \mathcal{Q}\bm{v},\bm{v}\right> + \delta_{\mathcal{P}_1}^*(-\bm{r}), \\
-    &\quad \text{s.t.} \quad  \mathcal{A}^*(\bm{y}) + \mathcal{B}^*\bm{z} + \bm{s} - \mathcal{Q}\bm{v} + \bm{r} = \bm{c}.
+    &\min_{\mathbf{y},\mathbf{z},\mathbf{s},\mathbf{r},\mathbf{v}}  \quad  \delta_{\mathcal{P}_2}^*(-\mathbf{y}) + f^*(\mathbf{-z}) +  p^*(-\mathbf{s}) + \frac{1}{2} \left< \mathcal{Q}\mathbf{v},\mathbf{v}\right> + \delta_{\mathcal{P}_1}^*(-\mathbf{r}), \\
+    &\quad \text{s.t.} \quad  \mathcal{A}^*(\mathbf{y}) + \mathcal{B}^*\mathbf{z} + \mathbf{s} - \mathcal{Q}\mathbf{v} + \mathbf{r} = \mathbf{c}.
 \end{aligned}
 $$
 
@@ -64,9 +64,9 @@ $$
 
 $$
 \begin{aligned}
-& \mathcal{L}_{\sigma}(\bm{y},\bm{s},\bm{z},\bm{r},\bm{v},\bm{o},\bm{q},\bm{t},\bm{x}_1,\bm{x}_2,\bm{x}_3,\bm{x}_4) = \delta^*_{\mathcal{P}_2}(-\bm{o}) + f^*(-\bm{q}) +p^*(-\bm{s}) - \left< \bm{b}_1,\bm{s}\right> + \frac{1}{2}\left< \mathcal{Q}(\bm{v}),\bm{v}\right>  \\
-& \qquad + \delta_{\mathcal{P}_1}^*(-\bm{t})  + \frac{\sigma}{2}\left(\|\bm{o}-\bm{y} +  \frac{1}{\sigma}\bm{x}_1 \|_{\mathrm{F}}^2 + \|\bm{q}-\bm{z}+ \frac{1}{\sigma}\bm{x}_2 \|_{\mathrm{F}}^2 + \|\bm{t}-\bm{r}+ \frac{1}{\sigma}\bm{x}_3 \|^2 \right) \\
-& \qquad + \frac{\sigma}{2}(\| \mathcal{A}^*(\bm{y}) + \mathcal{B}^*\bm{z} + \bm{s} - \mathcal{Q}\bm{v} + \bm{r} - \bm{c} + \frac{1}{\sigma}\bm{x}_4 \|_{\mathrm{F}}^2) - \frac{1}{2\sigma}\sum_{i=1}^4\|\bm{x}_i\|^2 .
+& \mathcal{L}_{\sigma}(\mathbf{y},\mathbf{s},\mathbf{z},\mathbf{r},\mathbf{v},\mathbf{o},\mathbf{q},\mathbf{t},\mathbf{x}_1,\mathbf{x}_2,\mathbf{x}_3,\mathbf{x}_4) = \delta^*_{\mathcal{P}_2}(-\mathbf{o}) + f^*(-\mathbf{q}) +p^*(-\mathbf{s}) - \left< \mathbf{b}_1,\mathbf{s}\right> + \frac{1}{2}\left< \mathcal{Q}(\mathbf{v}),\mathbf{v}\right>  \\
+& \qquad + \delta_{\mathcal{P}_1}^*(-\mathbf{t})  + \frac{\sigma}{2}\left(\|\mathbf{o}-\mathbf{y} +  \frac{1}{\sigma}\mathbf{x}_1 \|_{\mathrm{F}}^2 + \|\mathbf{q}-\mathbf{z}+ \frac{1}{\sigma}\mathbf{x}_2 \|_{\mathrm{F}}^2 + \|\mathbf{t}-\mathbf{r}+ \frac{1}{\sigma}\mathbf{x}_3 \|^2 \right) \\
+& \qquad + \frac{\sigma}{2}(\| \mathcal{A}^*(\mathbf{y}) + \mathcal{B}^*\mathbf{z} + \mathbf{s} - \mathcal{Q}\mathbf{v} + \mathbf{r} - \mathbf{c} + \frac{1}{\sigma}\mathbf{x}_4 \|_{\mathrm{F}}^2) - \frac{1}{2\sigma}\sum_{i=1}^4\|\mathbf{x}_i\|^2 .
 \end{aligned}
 $$
 
@@ -74,35 +74,35 @@ $$
     $$
     \small
     \begin{aligned}
-    \Phi_{\sigma}(\bm{w}) &  =  \underbrace{p^*(\text{prox}_{p^*/\sigma}(\bm{x}_4/\sigma -\mathcal{A}^*(\bm{y}) - \mathcal{B}^*\bm{z}  - \mathcal{Q}\bm{v} -\bm{r} + \bm{c} ) ) + \frac{1}{2\sigma}\|\text{prox}_{\sigma p} (\bm{x}_4 + \sigma(\mathcal{A}^*(\bm{y}) + \mathcal{B}^*\bm{z}  - \mathcal{Q}\bm{v} + \bm{r} - \bm{c})) \|^2}_{ \text{Moreau~envelope~} p^* }
+    \Phi_{\sigma}(\mathbf{w}) &  =  \underbrace{p^*(\text{prox}_{p^*/\sigma}(\mathbf{x}_4/\sigma -\mathcal{A}^*(\mathbf{y}) - \mathcal{B}^*\mathbf{z}  - \mathcal{Q}\mathbf{v} -\mathbf{r} + \mathbf{c} ) ) + \frac{1}{2\sigma}\|\text{prox}_{\sigma p} (\mathbf{x}_4 + \sigma(\mathcal{A}^*(\mathbf{y}) + \mathcal{B}^*\mathbf{z}  - \mathcal{Q}\mathbf{v} + \mathbf{r} - \mathbf{c})) \|^2}_{ \text{Moreau~envelope~} p^* }
     \\
-    & \quad   +  \underbrace{\delta_{\mathcal{P}_1}^*(\text{prox}_{\delta^*_{\mathcal{P}_1} }(\bm{x}_3/\sigma - \bm{t} ) ) + \frac{1}{2\sigma}\|\Pi_{\mathcal{P}_1}(\bm{x}_3 -\sigma\bm{r}  ) \|^2}_{ \text{Moreau~envelope~} \delta^*_{\mathcal{P}_1} } +\underbrace{ \delta^*_{\mathcal{P}_2}(\text{prox}_{\delta^*_{\mathcal{P}_2}/\sigma}(\bm{x}_1/\sigma -\bm{y})) + \frac{1}{2\sigma}\|\Pi_{\mathcal{P}_2}(\bm{x}_1 - \sigma \bm{y}) \|^2}_{ \text{Moreau~envelope~} \delta^*_{\mathcal{P}_2}  }     \\
-    & \quad +  \underbrace{f^*(\text{prox}_{f^*/\sigma}(\bm{x}_2/\sigma -\bm{z} )) + \frac{1}{2\sigma} \|\text{prox}_{\sigma f}(\bm{x}_2 -\sigma \bm{z}  )  \|^2}_{ \text{Moreau~envelope~} f^* } + \frac{1}{2}\left<\mathcal{Q}\bm{v}, \bm{v}\right> - \frac{1}{2\sigma}\sum_{i=1}^4 \|\bm{x}_i \|^2.
+    & \quad   +  \underbrace{\delta_{\mathcal{P}_1}^*(\text{prox}_{\delta^*_{\mathcal{P}_1} }(\mathbf{x}_3/\sigma - \mathbf{t} ) ) + \frac{1}{2\sigma}\|\Pi_{\mathcal{P}_1}(\mathbf{x}_3 -\sigma\mathbf{r}  ) \|^2}_{ \text{Moreau~envelope~} \delta^*_{\mathcal{P}_1} } +\underbrace{ \delta^*_{\mathcal{P}_2}(\text{prox}_{\delta^*_{\mathcal{P}_2}/\sigma}(\mathbf{x}_1/\sigma -\mathbf{y})) + \frac{1}{2\sigma}\|\Pi_{\mathcal{P}_2}(\mathbf{x}_1 - \sigma \mathbf{y}) \|^2}_{ \text{Moreau~envelope~} \delta^*_{\mathcal{P}_2}  }     \\
+    & \quad +  \underbrace{f^*(\text{prox}_{f^*/\sigma}(\mathbf{x}_2/\sigma -\mathbf{z} )) + \frac{1}{2\sigma} \|\text{prox}_{\sigma f}(\mathbf{x}_2 -\sigma \mathbf{z}  )  \|^2}_{ \text{Moreau~envelope~} f^* } + \frac{1}{2}\left<\mathcal{Q}\mathbf{v}, \mathbf{v}\right> - \frac{1}{2\sigma}\sum_{i=1}^4 \|\mathbf{x}_i \|^2.
     \end{aligned}
     $$
     $$
-        \min_{\bm{y},\bm{z},\bm{r},\bm{v}} \max_{\bm{x}_1,\bm{x}_2,\bm{x}_3,\bm{x}_4 } \Phi(\bm{y},\bm{z},\bm{r},\bm{v};\bm{x}_1,\bm{x}_2,\bm{x}_3,\bm{x}_4).
+        \min_{\mathbf{y},\mathbf{z},\mathbf{r},\mathbf{v}} \max_{\mathbf{x}_1,\mathbf{x}_2,\mathbf{x}_3,\mathbf{x}_4 } \Phi(\mathbf{y},\mathbf{z},\mathbf{r},\mathbf{v};\mathbf{x}_1,\mathbf{x}_2,\mathbf{x}_3,\mathbf{x}_4).
     $$
 
-* **Nonlinear System**: The saddle point problem is equivalent to solving a system of nonlinear equations $F(\bm{w}) = 0$, where $F(\bm{w})$ is defined by the gradient of $\Phi$.
+* **Nonlinear System**: The saddle point problem is equivalent to solving a system of nonlinear equations $F(\mathbf{w}) = 0$, where $F(\mathbf{w})$ is defined by the gradient of $\Phi$.
     $$
-         F(\bm{w}) =
+         F(\mathbf{w}) =
          \begin{pmatrix}
-              \nabla_{\bm{y}} \Phi(\bm{w});\nabla_{\bm{z}} \Phi(\bm{w});\nabla_{\bm{r}} \Phi(\bm{w});\nabla_{\bm{v}} \Phi(\bm{w});
-             - \nabla_{\bm{x}_1} \Phi(\bm{w});
-             - \nabla_{\bm{x}_2} \Phi(\bm{w});
-             - \nabla_{\bm{x}_3} \Phi(\bm{w});
-             - \nabla_{\bm{x}_4} \Phi(\bm{w})
+              \nabla_{\mathbf{y}} \Phi(\mathbf{w});\nabla_{\mathbf{z}} \Phi(\mathbf{w});\nabla_{\mathbf{r}} \Phi(\mathbf{w});\nabla_{\mathbf{v}} \Phi(\mathbf{w});
+             - \nabla_{\mathbf{x}_1} \Phi(\mathbf{w});
+             - \nabla_{\mathbf{x}_2} \Phi(\mathbf{w});
+             - \nabla_{\mathbf{x}_3} \Phi(\mathbf{w});
+             - \nabla_{\mathbf{x}_4} \Phi(\mathbf{w})
          \end{pmatrix} = 0.
     $$
 
-* **Semismooth Newton Method**: An element $J^k$ from the generalized Jacobian $\hat{\partial} F(\bm{w}^k)$ is chosen to construct a Newton-like system. The search direction $\bm{d}^{k, i}$ is then computed by solving the following linear system:
+* **Semismooth Newton Method**: An element $J^k$ from the generalized Jacobian $\hat{\partial} F(\mathbf{w}^k)$ is chosen to construct a Newton-like system. The search direction $\mathbf{d}^{k, i}$ is then computed by solving the following linear system:
     $$
-    (J^k + \tau_{k,i} \mathcal{I}) \bm{d}^{k, i} = -  F(\bm{w}^k) + \bm{\varepsilon}^k,
+    (J^k + \tau_{k,i} \mathcal{I}) \mathbf{d}^{k, i} = -  F(\mathbf{w}^k) + \mathbf{\varepsilon}^k,
     $$
     This direction is used to update the variables for the next iteration.
     $$
-    \bar{\bm{w}}^{k,i}  = \bm{w}^k + \bm{d}^{k,i}.
+    \bar{\mathbf{w}}^{k,i}  = \mathbf{w}^k + \mathbf{d}^{k,i}.
     $$
 
 ## Installation
