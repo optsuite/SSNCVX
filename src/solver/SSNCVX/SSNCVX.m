@@ -100,8 +100,9 @@ else
         if isfield(pblk{j},'cofficient')
             pblk{j}.cofficient = 1;
         end
-        if isfield(pblk{j}.type,'fused')
+        if strcmp(pblk{j}.type,'fused')
             params.Binput = pblk{j}.Binput;
+            params.method = 'direct';
         end
     end
 end
