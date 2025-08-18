@@ -10,6 +10,8 @@
 ## Problem Formulation
 
 SSNCVX is a general algorithmic framework for solving the following convex composite optimization problem:
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 $$
 \begin{aligned}
@@ -18,16 +20,8 @@ $$
 \end{aligned}
 $$
 
-where $p(\mathbf{x})$ is a convex and nonsmooth function,  $\mathcal{A}: \mathcal{X} \rightarrow \mathbb{R}^m$, $\mathcal{B}: \mathcal{X} \rightarrow \mathbb{R}^l$ are linear operators, $f: \mathbb{R}^l \rightarrow \mathbb{R}$ is a convex function, $\mathbf{c} \in \mathcal{X}$, $\mathcal{Q}$ is a positive semidefinite matrix or operator, $\mathcal{P}_1 = \{\mathbf{x} \in \mathcal{X} \mid \texttt{l} \le \mathbf{x} \le \texttt{u}\}$ and $\mathcal{P}_2 = \{\mathbf{x}\in \mathbb{R}^m \mid \texttt{lb} \le \mathbf{x} \le \texttt{ub}\}$. The choices of $p(\mathbf{x})$ provide flexibility to handle many types of problems. While the proposed model focuses on a single variable $\mathbf{x}$, it is indeed capable of solving the following more general problem with $N$ blocks of variables and shifting terms $\mathbf{b}_{1,i}$, $\mathbf{b}_{2,i}$ ($i =1,\cdots,N$):
+where $p(\mathbf{x})$ is a convex and nonsmooth function,  $\mathcal{A}: \mathcal{X} \rightarrow \mathbb{R}^m$, $\mathcal{B}: \mathcal{X} \rightarrow \mathbb{R}^l$ are linear operators, $f: \mathbb{R}^l \rightarrow \mathbb{R}$ is a convex function, $\mathbf{c} \in \mathcal{X}$, $\mathcal{Q}$ is a positive semidefinite matrix or operator, $\mathcal{P}_1 = \{\mathbf{x} \in \mathcal{X} \mid \texttt{l} \le \mathbf{x} \le \texttt{u}\}$ and $\mathcal{P}_2 = \{\mathbf{x}\in \mathbb{R}^m \mid \texttt{lb} \le \mathbf{x} \le \texttt{ub}\}$. 
 
-$$
-\begin{aligned}
-\min_{\mathbf{x}_i} \quad & \sum_{i=1}^N p_i(\mathbf{x}_i - \mathbf{b}_{1,i}) + \sum_{i=1}^N f_i(\mathcal{B}_i(\mathbf{x}) - \mathbf{b}_{2,i}) + \sum_{i=1}^N \langle \mathbf{c}_i, \mathbf{x}_i \rangle + \sum_{i=1}^N \frac{1}{2} \langle \mathbf{x}_i, \mathcal{Q}_i(\mathbf{x}_i) \rangle, \\
-\text{s.t.} \quad & \mathbf{x}_i \in \mathcal{P}_{1,i}, ~~ \sum_{i=1}^N \mathcal{A}_i (\mathbf{x}_i) \in \mathcal{P}_{2}, \quad i =1,\cdots,N,
-\end{aligned}
-$$
-
-where $p_i,f_i,\mathbf{c}_i,\mathcal{Q}_i, \mathcal{P}_{1,i}$ and $\mathcal{P}_{2}$ satisfy the same assumptions as in the single-variable model. These models have widespread applications in engineering, image processing, and machine learning. We refer readers to Boyd et al. (2011), Anjos et al. (2011), and Wolkowicz et al. (2012) for concrete applications.
 
 Here we list some examples of the problem.
 
@@ -49,62 +43,6 @@ Here we list some examples of the problem.
 | Sparse PCA | $- \langle \mathbf{L},\mathbf{x} \rangle + \lambda \|\|\mathbf{x}\|\|_1$ | $\text{tr}(\mathbf{x}) =1, \mathbf{x} \succeq 0$ | (III) |
 | Basis pursuit | $\|\|\mathbf{x}\|\|_1$ | $ \mathcal{A}(\mathbf{x}) = \mathbf{b} $ | (V) |
 | Robust PCA | $\|\|\mathbf{x}_1\|\|_* + \lambda \|\|\mathbf{x}_2\|\|_1$ | $ \mathbf{x}_1 + \mathbf{x}_2 = \mathbf{D} $ | (III)(V) |
-
-## Algorithms
-
-* **Problem Formulation**: The algorithm starts by considering a multi-block convex optimization problem and formulating its dual.
-
-$$
-\begin{aligned}
-    &\min_{\mathbf{y},\mathbf{z},\mathbf{s},\mathbf{r},\mathbf{v}}  \quad  \delta_{\mathcal{P}_2}^*(-\mathbf{y}) + f^*(\mathbf{-z}) +  p^*(-\mathbf{s}) + \frac{1}{2} \left< \mathcal{Q}\mathbf{v},\mathbf{v}\right> + \delta_{\mathcal{P}_1}^*(-\mathbf{r}), \\
-    &\quad \text{s.t.} \quad  \mathcal{A}^*(\mathbf{y}) + \mathcal{B}^*\mathbf{z} + \mathbf{s} - \mathcal{Q}\mathbf{v} + \mathbf{r} = \mathbf{c}.
-\end{aligned}
-$$
-
-* **Augmented Lagrangian**: Introduce slack variables and formulate the augmented Lagrangian function $\mathcal{L}_{\sigma}$ of the equivalent problem.
-
-$$
-\begin{aligned}
-& \mathcal{L}_{\sigma}(\mathbf{y},\mathbf{s},\mathbf{z},\mathbf{r},\mathbf{v},\mathbf{o},\mathbf{q},\mathbf{t},\mathbf{x}_1,\mathbf{x}_2,\mathbf{x}_3,\mathbf{x}_4) = \delta^*_{\mathcal{P}_2}(-\mathbf{o}) + f^*(-\mathbf{q}) +p^*(-\mathbf{s}) - \left< \mathbf{b}_1,\mathbf{s}\right> + \frac{1}{2}\left< \mathcal{Q}(\mathbf{v}),\mathbf{v}\right>  \\
-& \qquad + \delta_{\mathcal{P}_1}^*(-\mathbf{t})  + \frac{\sigma}{2}\left(\|\mathbf{o}-\mathbf{y} +  \frac{1}{\sigma}\mathbf{x}_1 \|_{\mathrm{F}}^2 + \|\mathbf{q}-\mathbf{z}+ \frac{1}{\sigma}\mathbf{x}_2 \|_{\mathrm{F}}^2 + \|\mathbf{t}-\mathbf{r}+ \frac{1}{\sigma}\mathbf{x}_3 \|^2 \right) \\
-& \qquad + \frac{\sigma}{2}(\| \mathcal{A}^*(\mathbf{y}) + \mathcal{B}^*\mathbf{z} + \mathbf{s} - \mathcal{Q}\mathbf{v} + \mathbf{r} - \mathbf{c} + \frac{1}{\sigma}\mathbf{x}_4 \|_{\mathrm{F}}^2) - \frac{1}{2\sigma}\sum_{i=1}^4\|\mathbf{x}_i\|^2 .
-\end{aligned}
-$$
-
-* **Saddle Point Problem**: By minimizing the augmented Lagrangian with respect to some variables, the problem is reformulated as a differentiable saddle point problem based on the Moreau envelope.
-    $$
-    \small
-    \begin{aligned}
-    \Phi_{\sigma}(\mathbf{w}) &  =  \underbrace{p^*(\text{prox}_{p^*/\sigma}(\mathbf{x}_4/\sigma -\mathcal{A}^*(\mathbf{y}) - \mathcal{B}^*\mathbf{z}  - \mathcal{Q}\mathbf{v} -\mathbf{r} + \mathbf{c} ) ) + \frac{1}{2\sigma}\|\text{prox}_{\sigma p} (\mathbf{x}_4 + \sigma(\mathcal{A}^*(\mathbf{y}) + \mathcal{B}^*\mathbf{z}  - \mathcal{Q}\mathbf{v} + \mathbf{r} - \mathbf{c})) \|^2}_{ \text{Moreau~envelope~} p^* }
-    \\
-    & \quad   +  \underbrace{\delta_{\mathcal{P}_1}^*(\text{prox}_{\delta^*_{\mathcal{P}_1} }(\mathbf{x}_3/\sigma - \mathbf{t} ) ) + \frac{1}{2\sigma}\|\Pi_{\mathcal{P}_1}(\mathbf{x}_3 -\sigma\mathbf{r}  ) \|^2}_{ \text{Moreau~envelope~} \delta^*_{\mathcal{P}_1} } +\underbrace{ \delta^*_{\mathcal{P}_2}(\text{prox}_{\delta^*_{\mathcal{P}_2}/\sigma}(\mathbf{x}_1/\sigma -\mathbf{y})) + \frac{1}{2\sigma}\|\Pi_{\mathcal{P}_2}(\mathbf{x}_1 - \sigma \mathbf{y}) \|^2}_{ \text{Moreau~envelope~} \delta^*_{\mathcal{P}_2}  }     \\
-    & \quad +  \underbrace{f^*(\text{prox}_{f^*/\sigma}(\mathbf{x}_2/\sigma -\mathbf{z} )) + \frac{1}{2\sigma} \|\text{prox}_{\sigma f}(\mathbf{x}_2 -\sigma \mathbf{z}  )  \|^2}_{ \text{Moreau~envelope~} f^* } + \frac{1}{2}\left<\mathcal{Q}\mathbf{v}, \mathbf{v}\right> - \frac{1}{2\sigma}\sum_{i=1}^4 \|\mathbf{x}_i \|^2.
-    \end{aligned}
-    $$
-    $$
-        \min_{\mathbf{y},\mathbf{z},\mathbf{r},\mathbf{v}} \max_{\mathbf{x}_1,\mathbf{x}_2,\mathbf{x}_3,\mathbf{x}_4 } \Phi(\mathbf{y},\mathbf{z},\mathbf{r},\mathbf{v};\mathbf{x}_1,\mathbf{x}_2,\mathbf{x}_3,\mathbf{x}_4).
-    $$
-
-* **Nonlinear System**: The saddle point problem is equivalent to solving a system of nonlinear equations $F(\mathbf{w}) = 0$, where $F(\mathbf{w})$ is defined by the gradient of $\Phi$.
-    $$
-         F(\mathbf{w}) =
-         \begin{pmatrix}
-              \nabla_{\mathbf{y}} \Phi(\mathbf{w});\nabla_{\mathbf{z}} \Phi(\mathbf{w});\nabla_{\mathbf{r}} \Phi(\mathbf{w});\nabla_{\mathbf{v}} \Phi(\mathbf{w});
-             - \nabla_{\mathbf{x}_1} \Phi(\mathbf{w});
-             - \nabla_{\mathbf{x}_2} \Phi(\mathbf{w});
-             - \nabla_{\mathbf{x}_3} \Phi(\mathbf{w});
-             - \nabla_{\mathbf{x}_4} \Phi(\mathbf{w})
-         \end{pmatrix} = 0.
-    $$
-
-* **Semismooth Newton Method**: An element $J^k$ from the generalized Jacobian $\hat{\partial} F(\mathbf{w}^k)$ is chosen to construct a Newton-like system. The search direction $\mathbf{d}^{k, i}$ is then computed by solving the following linear system:
-    $$
-    (J^k + \tau_{k,i} \mathcal{I}) \mathbf{d}^{k, i} = -  F(\mathbf{w}^k) + \mathbf{\varepsilon}^k,
-    $$
-    This direction is used to update the variables for the next iteration.
-    $$
-    \bar{\mathbf{w}}^{k,i}  = \mathbf{w}^k + \mathbf{d}^{k,i}.
-    $$
 
 ## Installation
 
