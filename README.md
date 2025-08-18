@@ -24,25 +24,7 @@ where $p(\mathbf{x})$ is a convex and nonsmooth function,  $\mathcal{A}: \mathca
 
 
 Here we list some examples of the problem.
-
-| Problem | Objective Function | Constraints | Function block |
-|---------|--------------------|-------------|----------------|
-|  | $\underbrace{\langle \mathbf{c},\mathbf{x} \rangle}_{\text{(I)}} + \underbrace{\frac{1}{2}\langle \mathbf{x},\mathcal{Q}(\mathbf{x}) \rangle}_{\text{(II)}} + \underbrace{f(\mathcal{B}(\mathbf{x}))}_{\text{(III)}} + p(\mathbf{x})$ | $\underbrace{\mathbf{x} \in \mathcal{P}_1}_{\text{(IV)}}$, $\underbrace{\mathcal{A}(\mathbf{x}) \in \mathcal{P}_2}_{\text{(V)}}.$ | (I) (II) (III) (IV) (V) |
-| LP | $\langle \mathbf{c},\mathbf{x} \rangle $ | $\mathcal{A}(\mathbf{x}) = \mathbf{b},  \mathbf{x} \ge 0$ | (I)(V) |
-| SOCP | $\langle \mathbf{c},\mathbf{x} \rangle$ | $\mathcal{A}(\mathbf{x}) = \mathbf{b},  \mathbf{x} \in \mathcal{Q}^n$ | (I)(V) |
-| SDP | $\langle \mathbf{C},\mathbf{X} \rangle$ | $\mathcal{A}(\mathbf{X}) = \mathbf{b},  \mathbf{X} \succeq 0$ | (I)(V) |
-| SDP with box constraints | $\langle \mathbf{C},\mathbf{X} \rangle $ | $\mathcal{A}(\mathbf{X}) = \mathbf{b},  \mathbf{x} \in \mathcal{P}_1, \mathbf{X} \succeq 0$ | (I)(IV)(V) |
-| QP | $\langle \mathbf{x},\mathcal{Q}(\mathbf{x}) \rangle + \langle \mathbf{x},\mathbf{c}\rangle$ | $\texttt{l} \le \mathbf{x} \le \texttt{u}, \mathcal{A}(\mathbf{x}) = \mathbf{b}$ | (I)(II)(IV)(V) |
-| QP with $\ell_1$ norm | $\langle \mathbf{x},\mathcal{Q}(\mathbf{x}) \rangle + \lambda \|\|\mathbf{x}\|\|_1$ | $\texttt{l} \le \mathbf{x} \le \texttt{u}, \mathcal{A}(\mathbf{x}) = \mathbf{b}$ | (I)(II)(III)(V) |
-| Lasso | $\frac{1}{2}\|\|\mathcal{B}(\mathbf{x})-\mathbf{b}\|\|^2+ \lambda \|\|\mathbf{x}\|\|_1$ | - | (III) |
-| Fused Lasso | $\frac{1}{2}\|\|\mathcal{B}(\mathbf{x})-\mathbf{b}\|\|^2 + \lambda_1 \|\|\mathbf{x}\|\|_1 + \lambda_2\|\|D\mathbf{x}\|\|_1$ | - | (III) |
-| Group Lasso | $\frac{1}{2}\|\|\mathcal{B}(\mathbf{x})-\mathbf{b}\|\|^2+ \lambda \|\|\mathbf{x}\|\|_1$ |- | (III) |
-| Top-k Lasso | $\frac{1}{2}\|\|\mathcal{B}(\mathbf{x})-\mathbf{b}\|\|^2 +  \lambda \sum_{i=1}^k \mathbf{x}_{[i]} $ |- | (III) |
-| Low-rank matrix recovery | $\|\|\mathcal{B}(\mathbf{X}) - \mathbf{B}\|\|^2 + \lambda \|\|\mathbf{X}\|\|_*$ | - | (III) |
-| Sparse covariance matrix estimation | $- \log(\text{det}(\mathbf{X})) + \text{tr}(\mathbf{XS}) + \lambda \|\|\mathbf{X}\|\|_*$ | - | (I)(III) |
-| Sparse PCA | $- \langle \mathbf{L},\mathbf{x} \rangle + \lambda \|\|\mathbf{x}\|\|_1$ | $\text{tr}(\mathbf{x}) =1, \mathbf{x} \succeq 0$ | (III) |
-| Basis pursuit | $\|\|\mathbf{x}\|\|_1$ | $ \mathcal{A}(\mathbf{x}) = \mathbf{b} $ | (V) |
-| Robust PCA | $\|\|\mathbf{x}_1\|\|_* + \lambda \|\|\mathbf{x}_2\|\|_1$ | $ \mathbf{x}_1 + \mathbf{x}_2 = \mathbf{D} $ | (III)(V) |
+![图片描述](./problem.jpg)
 
 ## Installation
 
