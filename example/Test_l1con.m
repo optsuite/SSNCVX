@@ -50,8 +50,10 @@ for i =1%
     f{1}.shift = b;
 
 
-    %% solve
+    %% Solve
      [xopt, out] = SSNCVX(x0,pblk,Bt,f,[],[],[],[],[],[],[],opts);
+
+     %% Two block porblem
      x02{1,1} = x0;
      x02{2,1} = x0;
      pblk2{1,1} = pblk{1};

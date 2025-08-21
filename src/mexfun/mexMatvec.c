@@ -14,7 +14,11 @@
 #include <mex.h>
 #include <math.h>
 #include <matrix.h>
-/*#include "mymexheader.h"*/
+#include "header.h"
+
+#if !defined(MAX)
+#define  MAX(A, B)   ((A) > (B) ? (A) : (B))
+#endif
 
 /********************************
 * realdotde: x dense matrix,  
@@ -68,12 +72,12 @@ void mexFunction(int nlhs,   mxArray  *plhs[],
                  int nrhs,   const mxArray  *prhs[] )
 
 {    double   *A, *y;
+     double   *ytmp, *Ay;     
      mwIndex  *irA, *jcA, *iry, *jcy; 
-     double   *ytmp, *Ay;
-     int      isspA, isspy, options;
+     mwSize      isspA, isspy, options;
 
-     int      m1, n1, m2, n2, j, jm1; 
-     int      i, r, k, istart, iend, kstart, kend;
+     mwSize      m1, n1, m2, n2, j, jm1; 
+     mwSize      i, r, k, istart, iend, kstart, kend;
      double   tmp; 
 
 /* CHECK THE DIMENSIONS */

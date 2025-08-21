@@ -5,7 +5,7 @@
 - It is designed to efficiently solve **convex composite optimization problems**, including those with nonsmooth terms and conic constraints, as well as multi-block structures.
 - The **MATLAB** version is open source in this repo and specific details can be found in [this paper](#).
 - The ​​**C**++​​ version, is specifically designed to handle conic programming problems and offers improved performance for large-scale instances.
-- Visit [our website](#) for more information.
+- Visit [our website](#) for more detailed information.
 
 ## Problem Formulation
 
@@ -719,18 +719,20 @@ colormap('gray');
 
 ## References
 
-This software is released under the [MIT License](https://opensource.org/licenses/MIT).
 
-If you use SSNCVX in your research, please cite [this paper](#).
+If SSNCVX is useful in your research, please cite [our paper](#):
 
 ```bibtex
 @article{deng2025augmented,
 }
 ```
 
-If you want to contact us for collaboration or other inquiries, please reach out via email at [to_be_determined@pku.edu.cn]
+We hope that the package is useful for your application. If you have any bug reports or comments, please feel free to email one of the toolbox authors:
 
+ * Zhanwang Deng, dzw_opt2022 at stu.pku.edu.cn
+ * Tao Wei, weitao at pku.edu.cn
+ * Jirui Ma, majr at pku.edu.cn
+ * Zaiwen Wen, wenzw at pku.edu.cn
 
-=======
-# SSNCVX
->>>>>>> e1666d73c4c9dc5472e9b0bb7ce03fae4cb92407
+# License
+This package is released under the [MIT License](https://opensource.org/licenses/MIT).

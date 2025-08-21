@@ -12,21 +12,10 @@
 *
 *  Note: This program is a modification of a program that is 
 *        part of SeDuMi 1.02 (03AUG1998) written by Jos F. Sturm. 
-*
-* SDPNAL:
-* Copyright (c) 2008 by
-* Xinyuan Zhao, Defeng Sun, and Kim-Chuan Toh
 *********************************************************************/
 
-#include <mex.h>
+#include "mex.h"
 #include <math.h>
-#include <matrix.h> 
-
-#ifndef MWSIZE_MAX
-    #define  mwIndex        int
-    #define  mwSignedIndex  int
-    #define  mwSize         int
-#endif
 
 #if !defined(SQR)
 #define SQR(x) ((x)*(x))
@@ -159,7 +148,7 @@ void ubsolve(double *x,const double *u,const int n)
                   const int nrhs, const mxArray *prhs[])
 {
    const double  *U;
-   const mwIndex *irb, *jcb; 
+   const int     *irb, *jcb; 
    int           n, k, kend, isspb, options;   
    double        *y, *b, *btmp;
 

@@ -192,8 +192,8 @@ function [dy,relres,flag] = socp_ldl_solver(opts,rhsz,optcg)
 
     % solve lhs * ( Sinv * R^{-1} * dy) = rhs
     % dy = AHAt.mat \ rhs1_temp;
-    rhs1_sp = rhs1_temp(row_sp);
-    rhs1_den = rhs1_temp(row_den);
+    rhs1_sp = rhs1_temp(row_sp,:);
+    rhs1_den = rhs1_temp(row_den,:);
     mat21_tilde = [AHAt.mat21, rhs1_sp];
 
     % mat22_inv_mat21_tilde = AHAt.mat22.mat \ mat21_tilde;

@@ -38,7 +38,7 @@ else% At is a single matrix
         if (isempty(At))
             Aty = sparse(n,n);
         else
-            Aty = mexsmat_sdpnal({cone.type, cone.size}, At*y);
+            Aty = mexsmat({cone.type, cone.size}, At*y);
         end
     else
         if (isempty(At))

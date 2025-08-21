@@ -29,16 +29,18 @@ for i = 10
     At = model.At;
 
 
-    
 
+    %% opts setting
     opts.sigx4l = 0.3;
     opts.sigx4m = 0.4;
     opts.sigx4u = 0.4;
     opts.cgratio = 0.1;
     opts.muopts.mu_fact = 1.5;
     opts.adaplambda = 1;
+    opts.K = K;
+    opts.m = length(b);
 
-
+    %% pblk setting
     [m ,n]=size(A);
     pblk{1} = struct;
     pblk{1}.type = 's';
@@ -49,25 +51,21 @@ for i = 10
 
     lb = b;
     ub = b;
-    opts.cgmin = 50; 
-    opts.cgmed = 300;
-    opts.cgmax = 300; 
-    opts.K = K;
-    opts.m = length(b);
+    %% solve
+    [xopt, out] = SSNCVX([],pblk,[],[],[],C,[],[],At,lb,ub,opts);
 
-     [xopt, out] = SSNCVX([],pblk,[],[],[],C,[],[],At,lb,ub,opts);
-
-     pblk2{1,1} = pblk{1};
-     pblk2{2,1} = pblk{1};
-     At2{1,1} = At{1};
-     At2{2,1} = At{1};
-     C2{1,1} = C{1};
-     C2{2,1} = C{1};
-     lb = lb*2;
-     ub = ub*2;
-     opts.K{1,1} = K{1};
-     opts.K{2,1} = K{1};
-     [xopt, out] = SSNCVX([],pblk2,[],[],[],C2,[],[],At2,lb,ub,opts);
+    %% Two block problem
+    pblk2{1,1} = pblk{1};
+    pblk2{2,1} = pblk{1};
+    At2{1,1} = At{1};
+    At2{2,1} = At{1};
+    C2{1,1} = C{1};
+    C2{2,1} = C{1};
+    lb = lb*2;
+    ub = ub*2;
+    opts.K{1,1} = K{1};
+    opts.K{2,1} = K{1};
+    [xopt, out] = SSNCVX([],pblk2,[],[],[],C2,[],[],At2,lb,ub,opts);
 
 end
 out.totaltime

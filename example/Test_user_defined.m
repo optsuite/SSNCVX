@@ -1,21 +1,8 @@
 addpath(genpath('../'));
 clear
-%% Lasso
 problemtype = 'Lasso';
 datadir = '../data/Lasso';
 fname{1} = 'uci_CT';
-fname{2} = 'log1p.E2006.train';
-fname{3} = 'E2006.test';
-fname{4} = 'log1p.E2006.test';
-fname{5} = 'pyrim_scale_expanded5';
-fname{6} = 'triazines_scale_expanded4';
-fname{7} = 'abalone_scale_expanded7';
-fname{8} = 'bodyfat_scale_expanded7';
-fname{9} = 'housing_scale_expanded7';
-fname{10} = 'mpg_scale_expanded7';
-fname{11} = 'space_ga_scale_expanded9';
-fname{12} = 'E2006.train';
-%% QP
 for i =1
     probname = [datadir,filesep,fname{i}];
     fprintf('\n Problem name: %s \n', fname{i});
@@ -50,11 +37,11 @@ for i =1
     %% f setting
     f{1} = struct;
     f{1}.type = 'l2con2';
+    f{1}.user_defined = 1;
     f{1}.size = n;
     f{1}.coefficient = 1;
     f{1}.pobj = @(X) 0;
     f{1}.dobj = @(X,pblk) dobj(X,pblk);
-    % f{1}.D1 = @(X) X;
     f{1}.prox = @(X,coefficient,sigma) prox(X,coefficient,sigma);
     f{1}.Matvec = @(X,par) Matvec(X,par);
     f{1}.DPhi = @(iHW,d) DPhi(iHW,d);
@@ -67,13 +54,11 @@ for i =1
 
 
 
-    opts.Ayes = 1;
-
     opts.cgmin = 50;
     opts.cgmed = 300;
     opts.method = 'iterative';
     opts.cgmax = 300;
-    
+    %% solve
      [xopt, out] = SSNCVX(x0,pblk,Bt,f,[],[],[],[],[],[],[],opts);
      x02{1,1} = x0;
      x02{2,1} = x0;
@@ -84,9 +69,7 @@ for i =1
      Bt2{2,1} = Bt;
      f2{1,1} = f{1};
      f2{2,1} = f{1};
-     % [xopt, out] = SSNCVX(x02,pblk2,Bt2,f2,[],[],[],[],[],[],[],opts);
-     % 
-     % norm(Bt'*xopt.var{1} + b,2)
+
 
 end
 out.totaltime

@@ -88,8 +88,7 @@ for i =1:plength
             %     value = inf;
             % end
         end
-    elseif isfield(pblk{i},'user_defined') && pblk{i}.user_defined == 1
-        value = value + pblk{i}.dobj(X{i},pblk{i});
+    elseif 
     end
 end
 end

@@ -182,6 +182,7 @@ else
         if norm(lb - ub) == 0
             params.Axeqb = 1;
             params.b = lb;
+            params.borg = lb;
         end
     else
         params.Aboxflag = 0;
@@ -213,15 +214,20 @@ muopts = opts.muopts;
 cgopts = opts.cgopts;
 record = opts.record;
 maxits = opts.maxits;
+
 params.C = C;
 if ~isempty(At)
     if ~strcmp(pblk{1}.type,'s')
         params.Amap = @(X) Amap(X, At);
         params.ATmap = @(y) ATmap(y, At);
-    elseif norm(lb-ub) == 0
+    elseif norm(lb-ub) == 0 
         b =lb;
+        
         params.borg = b;
+        params.Corg = C;
+        if params.fflag == 0
         [At,b,C, params] = preprocess_SDP(At,b,C, opts, params);
+        end
         params.Amap = @(X) AXmap(X, opts.K, At, params.Lchol);
         params.ATmap = @(y) Atymap(y, opts.K, At, params.Lchol);
         params.lb = b;
@@ -344,7 +350,7 @@ params = initial_NEWT_params(params, NEWTopts);
 params.NEWT.lambda = opts.lambda;
 %% initial variable and operator
 if params.Aboxflag == 1
-    params.mdim = opts.m;
+    params.mdim = length(lb);
     y.var = zeros(params.mdim, 1);
 else
     y.var = zeros(1,1);
@@ -594,6 +600,9 @@ for iter = 1:opts.maxits
         continue;
     end
     %------------------------------------------------------------------
+    if iter == 36
+        1;
+    end
     params = record_optimal_NEWT(y,Z,R,V,S,X4,params,iter);
  
     %% define header for printing
@@ -716,7 +725,7 @@ end
 
 %%
 function params = record_optimal_NEWT(y,Z,R,V,S,X4,params,iter)
-trCX = full(dot_ssn(full(params.C), X4.var));
+
 QX4 = params.Qcmap(X4.var);
 Qv = params.Qcmap(V.var);
 xQx = 0.5*dot_ssn(QX4,X4.var);
@@ -726,8 +735,14 @@ if isfield(params,'scale')
         R.var{i}(abs(R.var{i})<1e-6) = 0;
         XP{i,1} = max(-R.var{i}*params.scale.Cscale,0);
         XN{i,1} = min(-R.var{i}*params.scale.Cscale,0);
+        X = params.scale.bscale * X4.var;
+        tmp2 = params.Bmap(X);
+        % y = scale.Cscale * (scale.DA * bwsolve(trans.Lchol, y));
+        trCX = full(dot_ssn(full(params.Corg), X));
     end    
 else
+    trCX = full(dot_ssn(full(params.C), X4.var));
+    tmp2 = params.Bmap(X4.var);
     for i = 1:params.nblock
         XP{i,1} = max(-R.var{i},0);
         XN{i,1} = min(-R.var{i},0);
@@ -748,7 +763,7 @@ else
 end
 
 
-tmp2 = params.Bmap(X4.var);
+
 if isfield(params,'fvalue')
     pobj =  (xQx + trCX + params.fvalue(tmp2,params) + params.pvalue(X4.var,params));
 else
@@ -774,11 +789,11 @@ else
 end
 
 if params.Aboxflag == 1
-    if params.fap == 1
-    dualtmp2 = sum(yN.*params.borg) + sum(yP.*params.borg);
-    else
+    % if params.fap == 1
     dualtmp2 = sum(yN.*params.lb) + sum(yP.*params.ub);
-    end
+    % else
+    % dualtmp2 = sum(yN.*params.lb) + sum(yP.*params.ub);
+    % end
 else
     dualtmp2 = 0;
 end
@@ -790,7 +805,7 @@ else
 end
 
 if isfield(params,'scale') && isfield(params.scale,'objscale')
-    pobj =  params.scale.objscale*pobj;
+    pobj =  pobj;
     dobj =  dobj;
 end
 

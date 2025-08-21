@@ -59,11 +59,12 @@ for i = 3
 
 
     
-
+     %% solve
      [xopt, out] = SSNCVX(x0,pblk,Bt,f,[],[],[],[],[],[],[],opts);
      x02{1,1} = x0;
      x02{2,1} = x0;
-     1;
+     
+     %% two block problem
      pblk2{1,1} = pblk{1};
      pblk2{2,1} = pblk{1};
      Bt2{1,1} = Bt;

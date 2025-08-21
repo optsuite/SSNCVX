@@ -91,7 +91,7 @@ for i = 16%
     f{1}.coefficient = 0.5;
 
 
-    [xopt, out] = SSNCVX(x0,pblk,[],f,[],C,l,u,At,lb,ub,opts);
+    [xopt, out] = SSNCVX(x0,pblk,[],f,Q,C,l,u,At,lb,ub,opts);
 
     % opts.fap = 0;
     % f2{1,1} = f{1};

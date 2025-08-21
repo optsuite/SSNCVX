@@ -15,7 +15,7 @@ fname{9} = 'housing_scale_expanded7';
 fname{10} = 'mpg_scale_expanded7';
 fname{11} = 'space_ga_scale_expanded9';
 fname{12} = 'E2006.train';
-for i = 1% 1  3 11 12
+for i = 8% 1  3 11 12
     %% load data
     probname = [datadir,filesep,fname{i}];
     fprintf('\n Problem name: %s \n', fname{i});
@@ -39,9 +39,12 @@ for i = 1% 1  3 11 12
 
 
     %% opts setting
-    opts = defalut_opts(crho,i);
+    % opts = defalut_opts(crho,i);
     opts.lambda = 10;
-    opts.sigma = 1/opts.sigma;
+    opts.sigma = 1;
+    opts.sigzl = 0.8;
+    opts.sigx4l = 0.6;
+    opts.nu = 5;
     opts.sigzm = opts.sigzl;
     opts.sigzu = opts.sigzl;
     opts.sigx4m = opts.sigx4l;
@@ -57,6 +60,7 @@ for i = 1% 1  3 11 12
     pblk{1}.type = 'l1';
     pblk{1}.topk = 10;
     pblk{1}.size = n;
+    opts.resmin = 0.07;
     pblk{1}.coefficient = lambda;
 
 
@@ -75,33 +79,3 @@ for i = 1% 1  3 11 12
 
 end
 out.totaltime
-
-function opts = defalut_opts(crho,i)
-    if crho == 1e-3
-        if i == 1 opts.sigzl = 0.8; opts.sigx4l = 0.6; opts.sigma = 1;opts.nu = 5;opts.resmin = 0.07;opts.t_adap = 0; end %1e-3
-        if i == 2 opts.sigzl = 0.6; opts.sigx4l = 0.6;opts.resmin = 100;opts.sigma = 30; opts.lfactor = 0.8;opts.linratio = 0.4;end %？
-        if i == 3 opts.sigzl = 1; opts.sigx4l = 1; opts.sigma = 1;opts.nu = 5;opts.resmin = 0.05;opts.t_adap = 0; end%1e-3
-        if i == 4 opts.sigzl = 1; opts.sigx4l = 0.9;opts.resmin = 500;opts.sigma = 50; opts.lfactor = 0.8;opts.linratio = 0.6;end %？
-        if i == 5 opts.sigzl = 1; opts.sigx4l = 1;opts.resmin = 0.1; opts.t_adap = 0;opts.sigma = 1;end % ?
-        if i == 6 opts.sigzl = 1; opts.sigx4l = 1;opts.resmin = 500;opts.sigma = 10;end
-        if i == 7 opts.sigzl = 1; opts.sigx4l = 1;opts.resmin = 2;opts.sigma = 10; opts.lfactor = 0.8;end
-        if i == 8 opts.sigzl = 0.8; opts.sigx4l = 0.8;opts.resmin = 300;opts.sigma = 10; end
-        if i == 9 opts.sigzl = 0.7; opts.sigx4l = 0.7;opts.resmin = 300;opts.sigma = 5;opts.lfactor = 0.9; opts.linratio = 0.8;end%？
-        if i == 11 opts.sigzl = 1; opts.sigx4l = 1; opts.sigma = 1;opts.nu = 5;opts.resmin = 0.05;opts.t_adap = 0; end%1e-3
-        if i == 12 opts.sigzl = 1; opts.sigx4l = 1; opts.sigma = 5;opts.nu = 5;opts.resmin = 0.05;opts.t_adap = 0; end%1e-3
-        if i == 10 opts.sigzl = 0.8; opts.sigx4l = 0.8;opts.resmin = 0.02;opts.t_adap = 0; opts.sigma = 0.5;end
-    elseif crho == 1e-4
-        if i == 1 opts.sigzl = 0.5; opts.sigx4l = 0.5; opts.sigma = 50;opts.nu = 5;opts.resmin = 5;opts.t_adap = 0;opts.lfactor = 0.8;opts.adaplambda = 1; end %1e-3
-        if i == 2 opts.sigzl = 0.6; opts.sigx4l = 0.6;opts.resmin = 700;opts.sigma = 600; opts.lfactor = 0.98;opts.linratio = 0.8;end %？
-        if i == 3 opts.sigzl = 1; opts.sigx4l = 1; opts.sigma = 1;opts.nu = 5;opts.resmin = 0.05;opts.t_adap = 0; end%1e-3
-        if i == 4 opts.sigzl = 1.2; opts.sigx4l = 0.8;opts.resmin = 700;opts.sigma = 500; opts.lfactor = 0.98;opts.linratio = 0.8;end %？
-        if i == 5 opts.sigzl = 0.6; opts.sigx4l = 0.6;opts.resmin = 0.1; opts.t_adap = 0;opts.sigma = 0.01;opts.adaplambda = 1;opts.lfactor = 0.7; end % ?
-        if i == 6 opts.sigzl = 1; opts.sigx4l = 1;opts.resmin = 500;opts.sigma = 1;opts.adaplambda = 1;   end
-        if i == 7 opts.sigzl = 1; opts.sigx4l = 1;opts.resmin = 2;opts.sigma = 10; opts.lfactor = 0.8;end
-        if i == 8 opts.sigzl = 0.8; opts.sigx4l = 0.8;opts.resmin = 300;opts.sigma = 1;opts.adaplambda = 1; end
-        if i == 9 opts.sigzl = 0.6; opts.sigx4l = 0.6;opts.resmin = 300;opts.sigma = 0.1;opts.lfactor = 0.9; opts.linratio = 0.8;opts.adaplambda = 1;end%？
-        if i == 11 opts.sigzl = 1; opts.sigx4l = 1; opts.sigma = 0.1;opts.nu = 5;opts.resmin = 5;opts.t_adap = 0; end%1e-3
-        if i == 12 opts.sigzl = 0.6; opts.sigx4l = 0.6; opts.sigma = 5;opts.nu = 5;opts.resmin = 0.5;opts.t_adap = 0;opts.adaplambda = 1; end%1e-3
-        if i == 10 opts.sigzl = 0.8; opts.sigx4l = 0.8;opts.resmin = 0.02;opts.t_adap = 0; opts.sigma = 0.5;end
-    end
-end

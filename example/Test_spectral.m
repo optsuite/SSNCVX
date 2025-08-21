@@ -39,8 +39,8 @@ for i = 12% 1  3 11 12
 
 
     opts.method = 'iterative';
-
-    
+    [xopt, out] = SSNCVX([],pblk,B,f,[],[],[],[],[],[],[],opts);
+    %% Two block problem
 
      pblk2{1,1} = pblk{1};
      pblk2{2,1} = pblk{1};

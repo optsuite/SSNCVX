@@ -5,8 +5,6 @@ addpath([root_dir]);
 addpath(genpath(test_dir));
 dir_results = "../results";
 dir_data = addpath_data();
-
-
 dataset = "fap";
 probnames = fapprobs;
 save_root = strcat(dir_results,'/' ,dataset);
@@ -58,6 +56,8 @@ for i = 1
     %% solve
     [xopt, out] = SSNCVX([],pblk,[],[],[],C,l,u,At,lb,ub,opts);
 
+
+     %% Two block problem
      pblk2{1,1} = pblk{1};
      pblk2{2,1} = pblk{1};
      At2{1,1} = At{1};

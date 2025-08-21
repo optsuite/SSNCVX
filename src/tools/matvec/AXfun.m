@@ -71,9 +71,9 @@ else % At is a single matrix
         if (isempty(At))
             AX = [];
         elseif (length(cone.size) == 1)
-            AX = (mexsvec_sdpnal({cone.type, cone.size}, X)' * At)';
+            AX = (mexsvec({cone.type, cone.size}, X)' * At)';
         else
-            AX = (mexsvec_sdpnal({cone.type, cone.size}, sparse(X))' * At)';
+            AX = (mexsvec({cone.type, cone.size}, sparse(X))' * At)';
         end
     else
         if (isempty(At))

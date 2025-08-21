@@ -1,6 +1,6 @@
 addpath(genpath('../'));
 clear
-%% QP
+%% Problem
 problemtype = 'QP';
 datadir = '../data/QP';
 fname{1} = 'AUG2DCQP';
@@ -68,9 +68,10 @@ for i = 12
     f{1}.type = 'exp';
     f{1}.size = n;
     f{1}.coefficient = 1;
-    %% solve
+    %% Solve
     [xopt, out] = SSNCVX([],pblk,[],f,[],[],[],[],[],[],[],opts);
 
+    %% 
      pblk2{1,1} = pblk{1};
      pblk2{2,1} = pblk{1};
      f2{1,1} = f{1};
