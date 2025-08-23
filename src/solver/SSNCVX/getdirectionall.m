@@ -1,4 +1,9 @@
 function [out, params] = getdirectionall(F,params,cgopts)
+%% getdirectionall: obtain the update direction of all priaml and the dual variables.
+%%
+%% Copyright (c) 2025 by
+%% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
+%%
 tau1 = params.NEWT.tau1;
 tau2 = params.NEWT.tau2;
 tau3 = params.NEWT.tau3;

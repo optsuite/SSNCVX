@@ -1,3 +1,8 @@
+%% Test_spectral: test the problem that has spectral norm
+%%
+%% Copyright (c) 2025 by
+%% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
+%%
 addpath(genpath('../'));
 clear
 %% Nuclear
@@ -7,20 +12,13 @@ colormap('gray')
 noi_image = ori_image + 0.1*randn(size(ori_image));
 imshow(noi_image);
 1;
-for i = 12% 1  3 11 12
+for i = 12
     [n1,n2] = size(noi_image);
- 
-
-
-
-    
-
     %% opts setting
     opts.tol = 1e-5;
     opts.sigyl = 0.5;
     opts.sigym = 0.5;
     opts.sigyu = 0.5;
-
     x0 = zeros(n1,n2,1);
 
     %% pblk setting
@@ -37,18 +35,13 @@ for i = 12% 1  3 11 12
     f{1}.coefficient = 1;
     f{1}.shift = noi_image;
 
-
     opts.method = 'iterative';
     [xopt, out] = SSNCVX([],pblk,B,f,[],[],[],[],[],[],[],opts);
     %% Two block problem
-
      pblk2{1,1} = pblk{1};
      pblk2{2,1} = pblk{1};
-
-
      f2{1,1} = f{1};
      f2{2,1} = f{1};
-
     [xopt, out] = SSNCVX([],pblk2,B,f2,[],[],[],[],[],[],[],opts);
 
 

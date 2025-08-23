@@ -1,7 +1,10 @@
 function [xopt, out] = SSNCVX(x0,pblk,Bt,f,Q,C,l,u,At,lb,ub,opts,y,z,v,r)
+%% SSNCVX: The main solver function to solve the multi-block problem
+%%
+%% Copyright (c) 2025 by
+%% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
+%%
 params.pflag = 1;
-Ayes = 1;
-
 nnls = 5;
 params.fap = 0;
 if isfield(opts,'tol');        tol           = opts.tol; end
@@ -17,14 +20,12 @@ if ~isfield(opts,'cgmed'); opts.cgmed = 300; end
 if ~isfield(opts,'cgmax'); opts.cgmax = 300; end
 params.fap = opts.fap;
 
-
-
 if ~isfield(opts,'sigyl');  opts.sigyl = 1; end
 if ~isfield(opts,'sigym');  opts.sigym = 1; end
 if ~isfield(opts,'sigyu');  opts.sigyu = 1; end
 if ~isfield(opts,'sigzl');  opts.sigzl = 1; end
 if ~isfield(opts,'sigzm');  opts.sigzm = 1; end
-if ~isfield(opts,'sigzu');  opts.sigzu = 1; end    
+if ~isfield(opts,'sigzu');  opts.sigzu = 1; end
 if ~isfield(opts,'sigrl');  opts.sigrl = 1; end
 if ~isfield(opts,'sigrm');  opts.sigrm = 1; end
 if ~isfield(opts,'sigru');  opts.sigru = 1; end
@@ -50,7 +51,7 @@ if ~isfield(opts,'gamma1');  opts.gamma1 = 0.5; end
 if ~isfield(opts,'gamma2');  opts.gamma2 = 0.9; end
 if ~isfield(opts,'gamma3');  opts.gamma3 = 5; end
 if ~isfield(opts,'cgratio');  opts.cgratio= 0.1; end
-
+if ~isfield(opts,'Ayes');   opts.Ayes = 1; end
 
 if ~isfield(opts,'lfactor');  opts.lfactor = 1; end
 if ~isfield(opts,'linratio');  opts.linratio= 1; end
@@ -68,13 +69,14 @@ if ~isfield(opts,'cgtol');  opts.cgtol = 1e-2*opts.tol; end
 if ~isfield(opts,'base');  opts.basename = 'test'; end
 
 params.method = opts.method;
+params.Ayes = opts.Ayes;
 params.Axeqb = 0;
-
+params.x0 = x0;
 params.fnonsmooth = 0;
 params.nblock = length(pblk);
-params.Ayes = Ayes;
+
 if isa(Bt,'double') || isa(Bt,'cell')
-params.Bt = Bt;
+    params.Bt = Bt;
 end
 params.l = l;
 params.u = u;
@@ -196,15 +198,12 @@ if isempty(C)
     end
 end
 
-
-
 %% Preprocess
 params.Lchol = struct();
 params.Lchol.isidentity = 1;
 if nargin < 2; opts = []; end
 opts = default_opts(opts);
 NEWTopts = opts.NEWTopts;
-
 if opts.log_path == ""
     fid = 1;
 else
@@ -220,13 +219,13 @@ if ~isempty(At)
     if ~strcmp(pblk{1}.type,'s')
         params.Amap = @(X) Amap(X, At);
         params.ATmap = @(y) ATmap(y, At);
-    elseif norm(lb-ub) == 0 
+    elseif norm(lb-ub) == 0
         b =lb;
-        
+
         params.borg = b;
         params.Corg = C;
         if params.fflag == 0
-        [At,b,C, params] = preprocess_SDP(At,b,C, opts, params);
+            [At,b,C, params] = preprocess_SDP(At,b,C, opts, params);
         end
         params.Amap = @(X) AXmap(X, opts.K, At, params.Lchol);
         params.ATmap = @(y) Atymap(y, opts.K, At, params.Lchol);
@@ -296,9 +295,9 @@ params.tic = tic;
 for i =  1:length(pblk)
     if ~strcmp(pblk{i}.type,'s')
         if iscell(At)
-        params.At{i} = At{i};
+            params.At{i} = At{i};
         else
-        params.At{i} = At;
+            params.At{i} = At;
         end
     end
     params.Qt{i} = Q;
@@ -308,16 +307,13 @@ params.proj_AX = @(y) projBox( y, params.lb,params.ub);
 if isfield(params,'xL')
     params.P1box = @(X) projBox( X, params.xL,params.xU);
 else
-params.P1box = @(X) projBox(X,l,u);
+    params.P1box = @(X) projBox(X,l,u);
 end
 params.P2box = @(y) projBox(y,lb,ub);
 params.sigma = opts.sigma;
-
 params.cgmin = opts.cgmin;
 params.cgmed = opts.cgmed;
 params.cgmax = opts.cgmax;
-
-
 
 params.sigyl = opts.sigyl;
 params.sigym = opts.sigym;
@@ -360,17 +356,17 @@ params.isZ = 1;
 if ~isempty(f)
     if isempty(Bt)
         if strcmp(params.f{1}.type,'exp')
-        Z.var = -1e-7*eyes_like(full(C));
+            Z.var = -1e-7*eyes_like(full(C));
         elseif  strcmp(params.f{1}.type,'logdet')
             Z.var = 1e-7*eyes_like(full(C));
         else
-        Z.var = 0*eyes_like(full(C));
+            Z.var = 0*eyes_like(full(C));
         end
         X2.var = zeros_like(Z.var);
     elseif isa(Bt,"struct")
         for j = 1:params.nblock
-        tmp = zeros([Bt.out_size,1]);
-        Z.var{j,1} = zeros_like(tmp);
+            tmp = zeros([Bt.out_size,1]);
+            Z.var{j,1} = zeros_like(tmp);
         end
         X2.var = zeros_like(C);
     elseif isa(Bt,"double")
@@ -399,7 +395,7 @@ if params.boxflag == 1
     R.var = zeros_like(C);
 else
     for i = 1:params.nblock
-    R.var{i,1} = zeros(1,1);
+        R.var{i,1} = zeros(1,1);
     end
 end
 params.r0 = R.var;
@@ -409,7 +405,7 @@ if params.Qflag == 1
     V.Avar = params.Amap(V.var);
 else
     for i = 1:params.nblock
-    V.var{i,1} = zeros(1,1);
+        V.var{i,1} = zeros(1,1);
     end
     params.isV = 0;
 end
@@ -604,7 +600,7 @@ for iter = 1:opts.maxits
         1;
     end
     params = record_optimal_NEWT(y,Z,R,V,S,X4,params,iter);
- 
+
     %% define header for printing
     log_info = {'%5s', 'iter', num2str(iter);
         '%7s', 'sigma', num2str(params.sigma, '%2.1e');
@@ -739,7 +735,7 @@ if isfield(params,'scale')
         tmp2 = params.Bmap(X);
         % y = scale.Cscale * (scale.DA * bwsolve(trans.Lchol, y));
         trCX = full(dot_ssn(full(params.Corg), X));
-    end    
+    end
 else
     trCX = full(dot_ssn(full(params.C), X4.var));
     tmp2 = params.Bmap(X4.var);
@@ -773,15 +769,15 @@ end
 
 
 if params.boxflag == 1
-    
+
     if params.fap == 1
         for j = 1:params.nblock
             tmpl{j,1} = max(params.l{j},-1e6);
             tmpu{j,1} = min(params.u{j},1e6);
         end
     else
-    tmpl = params.l;
-    tmpu = params.u;
+        tmpl = params.l;
+        tmpu = params.u;
     end
     dualtmp1 = dot_ssn(XN, tmpl) + dot_ssn(XP,tmpu); % sum(XP.*params.u) ;
 else
@@ -872,11 +868,9 @@ params.hists.dvp(iter) = dinf / pinf;
 params.hists.cgiter(iter) = params.cgiter;
 params.hists.K1 = etaK1;
 params.hists.K2 = etaK2;
-
 params.hists.P2 = etaP2;
 params.hists.P1 = etaP1;
 maxinf = max(pinf, dinf);
-
 params.hists.isNEWT(iter) = 1;
 params.hists.maxinf = maxinf;
 
@@ -894,7 +888,7 @@ if isfield(params,'scale')
         R.var{i}(abs(R.var{i})<1e-6) = 0;
         XP{i,1} = max(-R.var{i}*params.scale.Cscale,0);
         XN{i,1} = min(-R.var{i}*params.scale.Cscale,0);
-    end    
+    end
 else
     for i = 1:params.nblock
         XP{i,1} = max(-R.var{i},0);
@@ -915,7 +909,6 @@ else
     yN = 0;
 end
 
-
 tmp2 = params.Bmap(X4.var);
 if isfield(params,'fvalue')
     pobj =  (xQx + trCX + params.fvalue(tmp2,params) + params.pvalue(X4.var,params));
@@ -923,18 +916,16 @@ else
     pobj = xQx + trCX  + params.pvalue(X4.var,params);
 end
 
-
-
 if params.boxflag == 1
-    
+
     if params.fap == 1
         for j = 1:params.nblock
             tmpl{j,1} = max(params.l{j},-1e6);
             tmpu{j,1} = min(params.u{j},1e6);
         end
     else
-    tmpl = params.l;
-    tmpu = params.u;
+        tmpl = params.l;
+        tmpu = params.u;
     end
     dualtmp1 = dot_ssn(XN, tmpl) + dot_ssn(XP,tmpu); % sum(XP.*params.u) ;
 else
@@ -943,9 +934,9 @@ end
 
 if params.Aboxflag == 1
     if params.fap == 1
-    dualtmp2 = sum(yN.*params.borg) + sum(yP.*params.borg);
+        dualtmp2 = sum(yN.*params.borg) + sum(yP.*params.borg);
     else
-    dualtmp2 = sum(yN.*params.lb) + sum(yP.*params.ub);
+        dualtmp2 = sum(yN.*params.lb) + sum(yP.*params.ub);
     end
 else
     dualtmp2 = 0;
@@ -1021,11 +1012,9 @@ params.hists.pinf(iter) = pinf;
 params.hists.dinf(iter) = dinf;
 params.hists.pvd(iter) = pinf / dinf;
 params.hists.dvp(iter) = dinf / pinf;
-
 params.hists.cgiter(iter) = params.cgiter;
 params.hists.K1 = etaK1;
 params.hists.K2 = etaK2;
-
 params.hists.P2 = etaP2;
 params.hists.P1 = etaP1;
 maxinf = max(pinf, dinf);
@@ -1042,11 +1031,8 @@ rec.dobj = dobj;
 rec.totaltime = toc(params.tstart);
 rec.P1 = etaP1;
 rec.P2 = etaP2;
-
 rec.K1 = etaK1;
 rec.K2 = etaK2;
-
-
 end
 
 function params = sigPow_CGmaxit_updateplus(res,params,cgopts)
@@ -1081,8 +1067,6 @@ else
     sigPowx3      =params.sigx3u;
     sigPowx4      =params.sigx4u;
 end
-
-
 
 if params.NEWT.CG_maxit == params.cgmin  && min(params.cgres(end),params.cgres(end-1))>cgopts.CG_tol && params.cgiter > params.cgmin
     params.NEWT.CG_maxit = params.cgmed;
@@ -1274,8 +1258,6 @@ end
 end
 
 
-
-
 function result = ATmap(X, Q)
 
 if iscell(X) && iscell(Q)
@@ -1379,10 +1361,7 @@ if params.isL
     params.xL = params.l/bscale;
     params.xU = params.u/bscale;
 end
-% model_new.K = K;
-% model_new.At = At;
-% model_new.b = b;
-% model_new.C = C;
+
 
 objscale = bscale*Cscale;
 scale.bscale = bscale;

@@ -1,17 +1,21 @@
+%% Test_fap: test the fap problem
+%%
+%% Copyright (c) 2025 by
+%% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
+%%
 clear;
 root_dir = '../..';
 test_dir = '..';
 addpath([root_dir]);
 addpath(genpath(test_dir));
-dir_results = "../results";
+
 dir_data = addpath_data();
 dataset = "fap";
 probnames = fapprobs;
-save_root = strcat(dir_results,'/' ,dataset);
-table_str = [];
-timegeo = [];
+
 file_len = length(probnames);
 for i = 1
+    %% One block problem
     probname = probnames{i};
     model = SDPdata2model(dataset,probname,dir_data);
     A = model.At{1};
@@ -20,14 +24,10 @@ for i = 1
     L = model.L;
     U = model.U;
     lambda = 1;
-
-
-
     K = model.K;
     At = model.At;
 
-
-    %% opts setting
+    % opts setting
     opts.sigx4l = 0.4;
     opts.sigx4m = 0.4;
     opts.sigx4u = 0.5;
@@ -37,7 +37,7 @@ for i = 1
     opts.muopts.mu_fact = 1.5;
     [m ,n] = size(A);
 
-    %% pblk setting
+    % pblk setting
     pblk{1} = struct;
     pblk{1}.type = 's';
     pblk{1}.size = size(C{1},1);
@@ -45,17 +45,13 @@ for i = 1
     opts.K = K;
     opts.m = length(b);
     opts.fap = 1;
-
     l = L;
     u = U;
     lb = b;
     ub = b;
 
-
-
-    %% solve
+    % solve
     [xopt, out] = SSNCVX([],pblk,[],[],[],C,l,u,At,lb,ub,opts);
-
 
      %% Two block problem
      pblk2{1,1} = pblk{1};

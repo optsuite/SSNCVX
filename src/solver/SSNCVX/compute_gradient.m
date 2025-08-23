@@ -1,5 +1,9 @@
 
 function [F,S,x4, params] = compute_gradient(y,z,r,v,x1,x2,x3,x4,params)
+%% compute_gradient: compuate the gradient of the saddle point problem
+%%
+%% Copyright (c) 2025 by
+%% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
 %%
 F.res = 0;
 if params.Aboxflag == 1

@@ -31,19 +31,17 @@ Here we list some examples of the problem.
     MATLAB R2020a or a later version. (For old versions of MATLAB, there are some issues with mex functions.)
 
 2.  **Download the package:**
-    Clone this repository from GitHub.
+    Clone this repository from [GitHub](https://github.com/optsuite/SSNCVX/tree/main).
 
-3.  **Compile mex functions (optional):**
+3.  **Compile mex functions:**
     We have compiled mex functions for SSNCVX, but if there are any issues with the compiled mex functions, you can compile them yourself.
     
     Navigate to the `src\mexfun` directory within the package, delete files with suffix `.mexw64`, `.mexa64`, `.mexmaci64`, `.mexmaca64`. Then open `Installmex_ssm.m` in MATLAB and run it.
 
 4.  **Verify the installation:**
-    To verify that the installation is successful, you can run a simple example provided. Navigate to the `example` directory within the package and run the example script.
+    To verify that the installation is successful, you can run a simple example provided. Navigate to the `example` directory within the package and run the example script. If the script runs without any errors, the solver has been installed correctly.
 
-    If the script runs without any errors, the solver has been installed correctly.
-
-5.  **Add datasets and set path (optional):**
+5.  **Add datasets and set path:**
     If you want to use scripts in `example` directory to solve problems mentioned in the paper, please modify `example\addpath_data.m` and add the path of the datasets to the `data_dir` variable.
 
 

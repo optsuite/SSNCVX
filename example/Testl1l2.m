@@ -1,20 +1,15 @@
+%% Test_l1l2: test the problem that has l1l2 norm
+%%
+%% Copyright (c) 2025 by
+%% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
+%%
 addpath(genpath('../'));
 clear
 problemtype = 'Lasso';
 datadir = '../data/Lasso';
-fname{1} = 'uci_CT';
-fname{2} = 'log1p.E2006.train';
-fname{3} = 'E2006.test';
-fname{4} = 'log1p.E2006.test';
-fname{5} = 'pyrim_scale_expanded5';
-fname{6} = 'triazines_scale_expanded4';
-fname{7} = 'abalone_scale_expanded7';
-fname{8} = 'bodyfat_scale_expanded7';
-fname{9} = 'housing_scale_expanded7';
-fname{10} = 'mpg_scale_expanded7';
-fname{11} = 'space_ga_scale_expanded9';
-fname{12} = 'E2006.train';
-for i = 3
+fname{1} = 'E2006.test';
+for i = 1
+    %% One block problem
     probname = [datadir,filesep,fname{i}];
     fprintf('\n Problem name: %s \n', fname{i});
     if exist([probname,'.mat'])
@@ -31,7 +26,7 @@ for i = 3
     lambda=crho*lambdamax;
     stoptol = 1e-4;
     tol = 1e-6;
-    %% opts setting
+    % opts setting
     opts.maxits =  10000;
     opts.maxtime = 10000;
     opts.Amap = @(x) Amap(x);
@@ -44,27 +39,25 @@ for i = 3
 
     x0 = zeros(m,1);
     [m ,n]=size(A);
-    %% pblk setting
+    % pblk setting
     pblk{1} = struct;
     pblk{1}.type = 'l1l2';
     pblk{1}.size = [n,2];
     pblk{1}.coefficient = lambda;
 
-    %% f setting
+    % f setting
     f{1} = struct;
     f{1}.type = 'square';
     f{1}.size = n;
     f{1}.coefficient = 0.5;
     f{1}.shift = [-b,-b];
-
-
     
-     %% solve
+     % solve
      [xopt, out] = SSNCVX(x0,pblk,Bt,f,[],[],[],[],[],[],[],opts);
      x02{1,1} = x0;
      x02{2,1} = x0;
      
-     %% two block problem
+     %% Two block problem
      pblk2{1,1} = pblk{1};
      pblk2{2,1} = pblk{1};
      Bt2{1,1} = Bt;

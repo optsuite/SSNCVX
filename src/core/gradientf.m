@@ -1,4 +1,9 @@
-function  value = gradientf(f, X, trans)
+%% gradientf: compuate the gradient of differentable f
+%%
+%% Copyright (c) 2025 by
+%% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
+%%
+function  value = gradientf(f, X, params)
 plength = length(f);
 for i =1:plength
     if  strcmp(f{i}.type,'square')

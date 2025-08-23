@@ -10,5 +10,5 @@ function data_dir = addpath_data(datasetname)
     elseif strcmp(computer, 'GLNXA64') % my linux server
         data_dir = ['/public/shared/sdp_data/', datasetname];
     elseif strcmp(computer,'PCWIN64')
-        data_dir = ['E:\seafile\Seafile\ALDSDP\code\ssnsdp-beta-2nd\sdp_data\',datasetname];
+        data_dir = ['../data/',datasetname];
 end

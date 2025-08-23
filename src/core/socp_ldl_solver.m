@@ -1,8 +1,10 @@
-
+%% socp_ldl_solver: solve the linear system using LDL method
+%%
+%% Copyright (c) 2025 by
+%% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
+%%
 
 function [dy,relres,flag] = socp_ldl_solver(opts,rhsz,optcg)
-
-% function [dy, relres, flag] = solve_direct_opt2(K, At, rhs1, iHWy, Lchol, trans)
     K = opts.K;
     At = opts.At;
     rhs1 = rhsz;

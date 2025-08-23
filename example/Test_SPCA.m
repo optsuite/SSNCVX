@@ -1,12 +1,15 @@
+%% Test_SPCA: test the sparse PCA problem
+%%
+%% Copyright (c) 2025 by
+%% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
+%%
 clear;
 % clc;
 root_dir = '../..';
 test_dir = '..';
 addpath([root_dir]);
 addpath(genpath(test_dir));
-dir_results = "../results";
 dir_data = '../data';
-dir_logs = 'logs';
 
 
 dataset = "SPCA";
@@ -14,7 +17,8 @@ probnames = sPCAprobs;
 table_str = [];
 timegeo = [];
 file_len = length(probnames);
-for i = [ 1] %1 2 3 4 5 6 7 11 12 13
+for i = [ 2] 
+    %% One block problem
     probname = probnames{i};
     model = SDPdata2model(dataset,probname,dir_data);
     n = size(model.C,1);
@@ -35,30 +39,27 @@ for i = [ 1] %1 2 3 4 5 6 7 11 12 13
     %% opts setting
     opts.adaplambda = 1;
 
-
-
-
-
     [m ,n]=size(A);
-    %% pblk setting   
+    % pblk setting   
     pblk{1} = struct;
     pblk{1}.type = 's';
     pblk{1}.size = size(C{1},1);
     pblk{1}.coefficient = 1;
 
-
     lb = b;
     ub = b;
     opts.K = K;
     opts.m = length(b);
-    %% f setting   
+    % f setting   
     f{1} = struct;
     f{1}.type = 'l1';
     f{1}.size = n;
     f{1}.coefficient = 1/nrmC;
-
+    
+    % solve
     [xopt, out] = SSNCVX([],pblk,[],f,[],C,[],[],At,lb,ub,opts);
 
+    %% Two block problem
     pblk2{1,1} = pblk{1};
     pblk2{2,1} = pblk{1};
     At2{1,1} = At{1};

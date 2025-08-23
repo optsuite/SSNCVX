@@ -1,6 +1,6 @@
 function model =  data2model(dataset,probname,dir_data,options)
 if strcmp(dataset,'theta')
-    file = fullfile(dir_data, dataset, probname + "_Alt.mat");
+    file = fullfile(dir_data, 'SDP', probname + "_Alt.mat");
     [blk, At, C, b] = thetaread(file);
 %     [b,At,cnz] = data_process(blk,At,b);
     model.At = MatCell(At);
@@ -73,7 +73,7 @@ elseif strcmp(dataset,'biq')
     model.L = {0};
     model.U = {inf};
 elseif strcmp(dataset,'fap')   
-    file = [dir_data, '/fap/', probname, '.dat'];
+    file = [dir_data, '/SDP/', probname, '.dat'];
     [blk,At,C,b,L,U] = fapread_lu_sdpnal(file);
     model.At = MatCell(At);
     model.b = b;

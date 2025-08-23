@@ -1,5 +1,9 @@
 function [out] = matvec_ssncvx( At, par, q, params)
-
+%% matvec_ssncvx: compuate the matrix vector operation to solve the linear system
+%%
+%% Copyright (c) 2025 by
+%% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
+%%
 if (nargin < 5); AL = []; end
 if isempty(AL); existAL = 0; else; existAL = 1; end
 N = length(q.q1);

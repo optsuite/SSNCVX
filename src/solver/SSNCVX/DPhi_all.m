@@ -1,4 +1,9 @@
 function out = DPhi_all(iHW, d, pblk)
+%% DPhi_all: compuate the D(d) operation, D is the generalized Jacboian operator 
+%%
+%% Copyright (c) 2025 by
+%% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
+%%
 plength = length(pblk);
 for i = 1:plength
     cone = pblk{i};

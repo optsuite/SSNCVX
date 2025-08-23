@@ -1,4 +1,8 @@
-
+%% linearsolveall_ssncvx: use the iterative method to solve the linear equation
+%%
+%% Copyright (c) 2025 by
+%% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
+%%
 function  [out,resnrm,solve_ok] = linearsolveall_ssncvx(matvecfname,rhs,par,L,tol,maxit,params)
 sub_maxit = 100;
 

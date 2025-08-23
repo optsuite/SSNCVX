@@ -1,3 +1,8 @@
+%% Test_SDP: test the SDP problem
+%%
+%% Copyright (c) 2025 by
+%% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
+%%
 clear;
 root_dir = '../..';
 test_dir = '..';
@@ -5,18 +10,14 @@ addpath([root_dir]);
 addpath(genpath(test_dir));
 dir_results = "../results";
 dir_data = addpath_data();
-dir_logs = 'logs';
 dataset = "theta";
-instances = "all";
 probnames = thetaprobs;
-
-
-save_root = strcat(dir_results,'/' ,dataset);
-
-table_str = [];
-timegeo = [];
+% save_root = strcat(dir_results,'/' ,dataset);
+% table_str = [];
+% timegeo = [];
 file_len = length(probnames);
 for i = 10
+    %% One block problem
     probname = probnames{i};
     model = SDPdata2model(dataset,probname,dir_data);
     A = model.At{1};
@@ -28,19 +29,17 @@ for i = 10
     K = model.K;
     At = model.At;
 
-
-
-    %% opts setting
+    % opts setting
     opts.sigx4l = 0.3;
     opts.sigx4m = 0.4;
     opts.sigx4u = 0.4;
     opts.cgratio = 0.1;
-    opts.muopts.mu_fact = 1.5;
+    opts.muopts.mu_fact = 1.2;
     opts.adaplambda = 1;
     opts.K = K;
     opts.m = length(b);
 
-    %% pblk setting
+    % pblk setting
     [m ,n]=size(A);
     pblk{1} = struct;
     pblk{1}.type = 's';
@@ -48,10 +47,9 @@ for i = 10
     pblk{1}.size = size(C{1},1);
     pblk{1}.coefficient = 1;
 
-
     lb = b;
     ub = b;
-    %% solve
+    % solve
     [xopt, out] = SSNCVX([],pblk,[],[],[],C,[],[],At,lb,ub,opts);
 
     %% Two block problem
@@ -66,7 +64,6 @@ for i = 10
     opts.K{1,1} = K{1};
     opts.K{2,1} = K{1};
     [xopt, out] = SSNCVX([],pblk2,[],[],[],C2,[],[],At2,lb,ub,opts);
-
 end
 out.totaltime
 

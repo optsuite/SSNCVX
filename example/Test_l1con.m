@@ -1,3 +1,8 @@
+%% Test_l1con: test the problem that has l1 constraint
+%%
+%% Copyright (c) 2025 by
+%% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
+%%
 addpath(genpath('../'));
 clear
 %% Lasso
@@ -15,14 +20,15 @@ fname{9} = 'housing_scale_expanded7';
 fname{10} = 'mpg_scale_expanded7';
 fname{11} = 'space_ga_scale_expanded9';
 fname{12} = 'E2006.train';
-for i =1%
+for i =1
+    %% One block problem
     probname = [datadir,filesep,fname{i}];
     fprintf('\n Problem name: %s \n', fname{i});
     load([probname,'.mat'])
 
     [m,n] = size(A);
     Bt = A';
-    %% opts setting
+    % opts setting
     opts.sigx2l = 0.5;
     opts.sigx2m = 0.5;
     opts.sigx2u = 0.5;
@@ -30,7 +36,7 @@ for i =1%
     x0 = zeros(m,1);
     At = A';
     
-    %% pblk setting
+    % pblk setting
     [m ,n]=size(A);
     pblk{1} = struct;
     pblk{1}.type = 'l1';
@@ -39,7 +45,7 @@ for i =1%
     Bt = eye(n);
     pblk{1}.coefficient = 1;
 
-    %% f setting
+    % f setting
     f{1} = struct;
     f{1}.type = 'l1con';
     f{1}.size = n;
@@ -49,9 +55,8 @@ for i =1%
     b = 10*ones(n,1);
     f{1}.shift = b;
 
-
-    %% Solve
-     [xopt, out] = SSNCVX(x0,pblk,Bt,f,[],[],[],[],[],[],[],opts);
+    % Solve
+    [xopt, out] = SSNCVX(x0,pblk,Bt,f,[],[],[],[],[],[],[],opts);
 
      %% Two block porblem
      x02{1,1} = x0;
@@ -64,7 +69,6 @@ for i =1%
      f2{2,1} = f{1};
      [xopt, out] = SSNCVX(x02,pblk2,Bt2,f2,[],[],[],[],[],[],[],opts);
      norm(Bt'*xopt.var{1} + b,2)
-
 end
 out.totaltime
 

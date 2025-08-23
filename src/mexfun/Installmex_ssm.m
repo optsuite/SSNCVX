@@ -1,20 +1,3 @@
-%%  
-%  Author: Hantao Nie (nht@pku.edu.cn)
-%  Date: 2023-09-08 14:40:39
-%  LastEditors: Hantao Nie (nht@pku.edu.cn)
-%  LastEditTime: 2023-09-21 15:40:17
-%  Description: 
-%  
-%  Copyright (c) 2023, Hantao Nie, Peking University. 
-%   
-%%******************************************************
-%% Run this script in Matlab command window 
-%% 
-%% SDPNAL: 
-%% Copyright (c) 2008 by
-%% Xinyuan Zhao, Defeng Sun, and Kim-Chuan Toh 
-%%******************************************************
-
 function Installmex_ssm 
 
    computer_model = computer;
@@ -36,10 +19,7 @@ function Installmex_ssm
       libstr = '-lmwlapack -lmwblas  '; 
    end
    mexcmd = 'mex -O  -largeArrayDims  -output ';    
-%%
-   if (matlabversion < 7.3) 
-      error(' SDPNAL works only for MATLAB version 7.4 and above'); 
-   end
+
    fsp = filesep;
 
    curdir = pwd;  
@@ -49,7 +29,7 @@ function Installmex_ssm
 %%
    clear fname
 
-   % eval(['cd ','src/mexfiles_from_SDPNALplus']); 
+
    fprintf ('\n Now compiling the mexFunctions in:\n'); 
    %%
    fname{1} = 'mexbwsolve';
