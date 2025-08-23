@@ -5,12 +5,11 @@
 - It is designed to efficiently solve **convex composite optimization problems**, including those with nonsmooth terms and conic constraints, as well as multi-block structures.
 - The **MATLAB** version is open source in this repo and specific details can be found in [this paper](#).
 - The ​​**C**++​​ version, is specifically designed to handle conic programming problems and offers improved performance for large-scale instances.
-- Visit [our website](#) for more detailed information.
+- Visit [our website](http://faculty.bicmr.pku.edu.cn/~wenzw/ssncvx/index.html) for more detailed information.
 
 ## Problem Formulation
 
 SSNCVX is a general algorithmic framework for solving the following convex composite optimization problem:
-
 
 $$
 \begin{aligned}
@@ -23,7 +22,7 @@ where $p(\mathbf{x})$ is a convex and nonsmooth function,  $\mathcal{A}: \mathca
 
 
 Here we list some examples of the problem.
-![图片描述](./problem.jpg)
+![图片描述](./assets/problem.jpg)
 
 ## Installation
 
@@ -31,17 +30,19 @@ Here we list some examples of the problem.
     MATLAB R2020a or a later version. (For old versions of MATLAB, there are some issues with mex functions.)
 
 2.  **Download the package:**
-    Clone this repository from [GitHub](https://github.com/optsuite/SSNCVX/tree/main).
+    Clone this repository from GitHub.
 
-3.  **Compile mex functions:**
+3.  **Compile mex functions (optional):**
     We have compiled mex functions for SSNCVX, but if there are any issues with the compiled mex functions, you can compile them yourself.
     
     Navigate to the `src\mexfun` directory within the package, delete files with suffix `.mexw64`, `.mexa64`, `.mexmaci64`, `.mexmaca64`. Then open `Installmex_ssm.m` in MATLAB and run it.
 
 4.  **Verify the installation:**
-    To verify that the installation is successful, you can run a simple example provided. Navigate to the `example` directory within the package and run the example script. If the script runs without any errors, the solver has been installed correctly.
+    To verify that the installation is successful, you can run a simple example provided. Navigate to the `example` directory within the package and run the example script.
 
-5.  **Add datasets and set path:**
+    If the script runs without any errors, the solver has been installed correctly.
+
+5.  **Add datasets and set path (optional):**
     If you want to use scripts in `example` directory to solve problems mentioned in the paper, please modify `example\addpath_data.m` and add the path of the datasets to the `data_dir` variable.
 
 
@@ -59,24 +60,16 @@ The standard form for a Linear Program that SSNCVX solves is:
 ```
 minimize    c' * x
 subject to  A * x = b
-            l <= x <= u
+            x >= 0
 ```
 
 Where `x` is the vector of optimization variables. For our first example, we will solve the following simple LP:
-
-- **Objective:** `minimize -x1 - 2*x2`
-- **Constraints:** 
-  - `2*x1 + x2 <= 4`
-  - `x1 + 2*x2 <= 4`
-- **Bounds:** `x1 >= 0, x2 >= 0`
-
-To match the solver's required format, we add slack variables (`s1`, `s2`) to convert the inequality constraints into equality constraints. The problem variables become `x = [x1; x2; s1; s2]`, and the problem is formulated as:
-
-- **c:** `[-1; -2; 0; 0]`
-- **A:** `[2, 1, 1, 0; 1, 2, 0, 1]`
-- **b:** `[4; 4]`
-- **l:** `[0; 0; 0; 0]`
-- **u:** `[inf; inf; inf; inf]`
+```
+minimize    -x1 - 2*x2
+subject to  2*x1 + x2 = 4
+            x1 + 2*x2 = 4
+            x1, x2 >= 0
+```
 
 --------------
 **MATLAB Implementation**
@@ -84,65 +77,82 @@ To match the solver's required format, we add slack variables (`s1`, `s2`) to co
 Here is the complete MATLAB script to solve this problem. You can copy and paste this into a new `.m` file and run it.
 
 ```matlab
-% Add the solver to your MATLAB path
-addpath(genpath('path/to/your/SSNCVX'));
+%% Tutorial for Linear Programming (LP)
+% This script demonstrates how to solve an LP problem using SSNCVX.
+% The problem is defined in the standard form:
+%
+% min c'*x
+% s.t. A*x = b
+%      x >= 0
+%
+% where x >= 0 means that x is in the non-negative orthant (a linear cone).
+%
+% We will solve a simple LP problem:
+% min -x1 - x2
+% s.t. x1 + 2*x2 = 6
+%      3*x1 + 2*x2 = 12
+%      x1, x2 >= 0
+% The optimal solution is x = [3; 1.5] with an objective value of -4.5.
 
-%% 1. Define the Problem Data
+clear;clc;
+addpath(genpath('../')); % Make sure the path to the solver is correct
 
-% Our variables are x = [x1; x2; s1; s2]
-n = 4;
+%% Problem Data Construction
+% min -x1 - x2  => c = [-1; -1]
+C = {[-1; -1]};
+n = 2; % Number of variables
 
-% Objective vector
-c = [-1; -2; 0; 0];
+% s.t. x1 + 2*x2 = 6
+%      3*x1 + 2*x2 = 12
+% A = [1 2; 3 2], b = [6; 12]
+% The solver requires At (transpose of A)
+At = {[1 3; 2 2]};
+b = [6; 12];
+lb = b; % Lower bound for A*x
+ub = b; % Upper bound for A*x
+m = 2;  % Number of equality constraints
 
-% Equality constraint matrix and vector
-A = sparse([2, 1, 1, 0; ...
-            1, 2, 0, 1]);
-b = [4; 4];
+% s.t. x >= 0
+% This defines a non-negative constraint on x, i.e., a linear cone.
+% The cone is of size n.
+pblk{1} = struct;
+pblk{1}.type = 'l'; % 'l' for linear cone (non-negativity)
+pblk{1}.size = n;
+pblk{1}.coefficient = 1; % Not used in this context, but required
 
-% Lower and upper bounds
-l = zeros(n, 1);
-u = inf(n, 1);
+% The K structure is also needed by the solver options
+K{1} = struct;
+K{1}.type = 'l';
+K{1}.size = n;
 
-%% 2. Set up the Solver Options
-
+%% Initial guess and solver options
 opts = struct();
-opts.maxits = 1000;       % Maximum number of iterations
-opts.stoptol = 1e-6;      % Stopping tolerance
-opts.method = 'iterative';
+opts.method = 'direct'; % Use the direct method solver
+opts.K = K;
+opts.m = m;
 
-%% 3. Define Problem Structure for SSNCVX
+%% Call the solver
+fprintf('Solving a small LP problem...\n');
+% The function call is similar to the SOCP example.
+% We pass our LP-specific data: pblk, C, At, lb, ub, opts.
+[xopt, out] = SSNCVX([], pblk, [], [], [], C, [], [], At, lb, ub, opts);
 
-% Initial guess
-x0 = zeros(n, 1);
+%% Display results
+fprintf('Solver finished.\n');
+fprintf('Total time: %f seconds\n', out.totaltime);
 
-% Objective function (f) - empty for a standard LP
-f = {}; 
+% The optimal solution is in xopt.var{1}
+sol = xopt.var{1};
+fprintf('Optimal solution x = [%f, %f]\n', sol(1), sol(2));
+fprintf('Optimal objective value c''*x = %f\n', C{1}'*sol);
 
-% Quadratic term (Q) - zero for an LP
-Q = sparse(n, n);
-
-% Problem block (pblk) - empty for standard constraints
-pblk = {};
-
-% Constraint matrices (At) and bounds (lb, ub) for Ax=b
-At = {A'};
-lb = b;
-ub = b;
-
-%% 4. Run the Solver
-
-[xopt, out] = SSNCVX(x0, pblk, [], f, Q, {c}, {l}, {u}, At, lb, ub, opts);
-
-%% 5. Display the Results
-
-variables = xopt.var{1};
-
-fprintf('Solver terminated in %d iterations.\n', out.iter);
-fprintf('Optimal objective value: %f\n', out.obj(end));
-fprintf('Optimal solution x:\n');
-fprintf('  - x1: %.4f\n', variables(1));
-fprintf('  - x2: %.4f\n', variables(2));
+% Verify constraints
+fprintf('Constraint violation ||Ax-b||: %e\n', norm(At{1}'*sol - b));
+if all(sol >= -1e-6) % Allow for small numerical tolerance
+    fprintf('Non-negativity constraint x >= 0 is satisfied.\n');
+else
+    fprintf('Non-negativity constraint is VIOLATED.\n');
+end
 ```
 
 ### Lasso
@@ -172,66 +182,68 @@ In this tutorial, we will solve a small Lasso problem with randomly generated da
 Here is the complete MATLAB script to solve this problem. You can copy and paste this into a new `.m` file and run it.
 
 ```matlab
-% Add the solver to your MATLAB path
-addpath(genpath('path/to/your/SSNCVX'));
+%% Tutorial for Lasso Problem
+% This script demonstrates how to solve a Lasso problem using SSNCVX.
+% The problem is defined as:
+%
+% min 0.5*||Ax-b||_2^2 + lambda*||x||_1
+%
+% We will construct a small-scale problem to illustrate the usage.
 
-%% 1. Generate Synthetic Data
+clear;clc;
+addpath(genpath('../'));
 
-m = 50;  % Number of samples
-n = 200; % Number of features
+%% Problem Data Construction
+% Generate a small random problem.
+m = 10; % Number of measurements
+n = 20; % Number of features
 
-% Generate a sparse ground truth signal
-x_true = sprandn(n, 1, 0.1); 
-
-% Generate a design matrix and response vector
+rng(42);
 A = randn(m, n);
-b = A * x_true + 0.1 * randn(m, 1); % Add some noise
+x_true = sprandn(n, 1, 0.2); % A sparse signal with 20% non-zero elements
+b = A * x_true + 0.1 * randn(m, 1);
 
-%% 2. Set up the Solver Options
+lambda = 0.1;
 
-lambda = 0.1; % Regularization parameter
+%% pblk setting for the l1-norm penalty
+% p(x) = lambda*||x||_1
+pblk{1} = struct;
+pblk{1}.type = 'l1';
+pblk{1}.size = n;
+pblk{1}.coefficient = lambda;
 
-opts = struct();
-opts.maxits = 1000;
-opts.stoptol = 1e-6;
-opts.method = 'direct'; % Use a direct solver for the subproblem
+%% f setting for the least-squares data fitting term
+% f(y) = 0.5*||y-b||^2 where y = Ax
+f{1} = struct;
+f{1}.type = 'square';
+f{1}.size = m; % The dimension of y is m
+f{1}.coefficient = 0.5;
+f{1}.shift = b;
 
-%% 3. Define Problem Structure for SSNCVX
-
-% Initial guess
+%% Initial guess and solver options
 x0 = zeros(n, 1);
+Bt = A'; % The solver requires the transpose of A
 
-% Objective function (f)
-f = cell(1);
-f{1} = struct('type', 'square', 'size', m, 'coefficient', 0.5, 'shift', -b);
+opts = struct(); % Use default options
 
-% Regularizer (pblk)
-pblk = cell(1);
-pblk{1} = struct('type', 'l1', 'size', n, 'coefficient', lambda);
-
-% Constraint matrix (B = A')
-Bt = A';
-
-%% 4. Run the Solver
-
+%% Call the solver
+fprintf('Solving a small Lasso problem...\n');
 [xopt, out] = SSNCVX(x0, pblk, Bt, f, [], [], [], [], [], [], [], opts);
 
-%% 5. Display and Plot the Results
+%% Display results
+fprintf('Solver finished.\n');
+fprintf('Total time: %f seconds\n', out.totaltime);
 
-fprintf('Solver terminated in %d iterations.\n', out.iter);
-fprintf('Optimal objective value: %f\n', out.obj(end));
-
-% Plot the true vs. recovered signal
+% Plot results for comparison
 figure;
-stem(x_true, 'b', 'filled', 'DisplayName', 'True Signal');
+stem(x_true, 'b-');
 hold on;
-stem(xopt.var{1}, 'r', 'DisplayName', 'Recovered Signal');
-legend;
+stem(xopt.var{1}, 'r--');
+legend('True Signal', 'Recovered Signal');
 title('Lasso: True vs. Recovered Signal');
-xlabel('Feature Index');
-ylabel('Coefficient Value');
 grid on;
 ```
+![lasso](./assets/tutorial_lasso.png)
 
 ### Fused Lasso
 
@@ -258,74 +270,77 @@ Where:
 This example demonstrates how to solve a Fused Lasso problem. We'll generate a piecewise constant signal and try to recover it.
 
 ```matlab
-% Add the solver to your MATLAB path
-addpath(genpath('path/to/your/SSNCVX'));
+%% Tutorial for Fused Lasso Problem
+% This script demonstrates how to solve a Fused Lasso problem using SSNCVX.
+% The problem is defined as:
+%
+% min 0.5*||Ax-b||_2^2 + lambda1*||x||_1 + lambda2*sum(|x_i - x_{i-1}|)
+%
+% We will construct a small-scale problem to illustrate the usage.
 
-%% 1. Generate Synthetic Data
+clear;clc;
+addpath(genpath('../'));
 
-n = 500; % Signal length
+%% Problem Data Construction
+% Generate a small random problem.
+m = 5;  % Number of measurements
+n = 10; % Number of features
 
-% Create a piecewise constant signal
-x_true = zeros(n, 1);
-x_true(101:150) = 2;
-x_true(251:300) = -1.5;
-x_true(401:420) = 1;
-
-% Create a measurement matrix and noisy measurements
-m = 200;
+rng(42);
 A = randn(m, n);
+b = randn(m, 1);
+x_true = zeros(n, 1);
+x_true(3:6) = 1; % A sparse and piecewise-constant signal
 b = A * x_true + 0.1 * randn(m, 1);
 
-%% 2. Set up the Solver Options
+lambda1 = 0.1;
+lambda2 = 0.1;
 
-lambda1 = 0.1; % Sparsity regularization
-lambda2 = 5;   % Fused (total variation) regularization
+%% pblk setting for the Fused Lasso penalty
+% p(x) = lambda1*||x||_1 + lambda2*sum(|x_i - x_{i-1}|)
+pblk{1} = struct;
+pblk{1}.type = 'fused';
+pblk{1}.size = n;
+pblk{1}.coefficient = lambda1;
+pblk{1}.coefficient2 = lambda2;
+[Bmap,BTmap] = FLBmap(n);
+pblk{1}.Binput = struct();
+pblk{1}.Binput.Bmap = Bmap;
+pblk{1}.Binput.BTmap = BTmap;
+
+%% f setting for the least-squares data fitting term
+% f(y) = 0.5*||y-b||^2 where y = Ax
+f{1} = struct;
+f{1}.type = 'square';
+f{1}.size = m; % The dimension of y is m
+f{1}.coefficient = 0.5;
+f{1}.shift = b;
+
+%% Initial guess and solver options
+x0 = zeros(n, 1);
+Bt = A'; % The solver requires the transpose of A
 
 opts = struct();
-opts.maxits = 2000;
-opts.stoptol = 1e-5;
-opts.method = 'direct';
+opts.method = 'direct'; % Use direct method rather than iterative
 
-%% 3. Define Problem Structure for SSNCVX
-
-% Initial guess
-x0 = zeros(n, 1);
-
-% Objective function (f)
-f = cell(1);
-f{1} = struct('type', 'square', 'size', m, 'coefficient', 0.5, 'shift', -b);
-
-% Regularizer (pblk)
-pblk = cell(1);
-pblk{1} = struct('type', 'fused', 'size', n, 'coefficient', lambda1, 'coefficient2', lambda2);
-
-% Define the difference operator D for the fused term
-[Bmap, BTmap] = FLBmap(n);
-pblk{1}.Binput = struct('Bmap', Bmap, 'BTmap', BTmap);
-
-% Constraint matrix (B = A')
-Bt = A';
-
-%% 4. Run the Solver
-
+%% Call the solver
+fprintf('Solving a small Fused Lasso problem...\n');
 [xopt, out] = SSNCVX(x0, pblk, Bt, f, [], [], [], [], [], [], [], opts);
 
-%% 5. Display and Plot the Results
+%% Display results
+fprintf('Solver finished.\n');
+fprintf('Total time: %f seconds\n', out.totaltime);
 
-fprintf('Solver terminated in %d iterations.\n', out.iter);
-fprintf('Optimal objective value: %f\n', out.obj(end));
-
-% Plot the true vs. recovered signal
+% Plot results for comparison
 figure;
-plot(x_true, 'b-', 'LineWidth', 2, 'DisplayName', 'True Signal');
+plot(x_true, 'b-', 'LineWidth', 2);
 hold on;
-plot(xopt.var{1}, 'r--', 'LineWidth', 1.5, 'DisplayName', 'Recovered Signal');
-legend;
+plot(xopt.var{1}, 'r--', 'LineWidth', 2);
+legend('True Signal', 'Recovered Signal');
 title('Fused Lasso: True vs. Recovered Signal');
-xlabel('Feature Index');
-ylabel('Coefficient Value');
 grid on;
 ```
+![fused](./assets/tutorial_fused.png)
 
 ### QP
 
@@ -342,20 +357,7 @@ subject to  A * x = b
             l <= x <= u
 ```
 
-Where:
-- `x` is the vector of optimization variables.
-- `Q` is a symmetric matrix (the quadratic form matrix).
-- `c` is a vector of linear coefficients.
-- `A*x = b` represents the linear equality constraints.
-- `l <= x <= u` represents the box constraints (lower and upper bounds) on the variables.
-
-To illustrate how to solve a QP with this solver, let's consider a simple example. We aim to find the point `x` in 2D space that is closest to the origin, subject to the constraints that `x1 + x2 = 1` and `0 <= x1, x2 <= 0.7`.
-
-This can be formulated as the following QP:
-
-- **Objective:** `minimize (1/2) * (x1² + x2²)`, which corresponds to `Q = eye(2)` and `c = zeros(2,1)`.
-- **Equality Constraint:** `x1 + x2 = 1`, which corresponds to `A = [1, 1]` and `b = 1`.
-- **Box Constraints:** `l = [0; 0]` and `u = [0.7; 0.7]`.
+Let's solve a random QP problem
 
 --------------
 **MATLAB Implementation**
@@ -363,61 +365,76 @@ This can be formulated as the following QP:
 Here is the complete MATLAB script to define and solve this problem using the SSNCVX solver.
 
 ```matlab
-% Add the solver to your MATLAB path
-addpath(genpath('path/to/your/SSNCVX'));
+%% Tutorial for Quadratic Programming (QP)
+% This script demonstrates how to solve a Quadratic Program using SSNCVX.
+% The problem is defined as:
+%
+% min 0.5*x'*Q*x + c'*x
+% s.t. Ax = b
+%      lb <= x <= ub
+%
+% We will construct a small-scale problem to illustrate the usage.
 
-%% 1. Define the Problem Data
+clear;clc;
+addpath(genpath('../'));
 
-n = 2; % Number of variables
-Q = speye(n);
-c = zeros(n, 1);
-A = sparse([1, 1]);
-b = 1;
-l = zeros(n, 1);
-u = 0.7 * ones(n, 1);
+%% Problem Data Construction
+n = 10; % Number of variables
+m = 5;  % Number of equality constraints
 
-%% 2. Set up the Solver Options
+% Generate a positive semi-definite matrix Q
+rng(42);
+Q_half = randn(n, n);
+Q = Q_half' * Q_half; 
+c = randn(n, 1);
 
-opts = struct();
-opts.maxits = 1000;       % Maximum number of iterations
-opts.stoptol = 1e-6;      % Stopping tolerance
-opts.method = 'iterative';
+A = randn(m, n);
+x_true = rand(n, 1);
+b = A * x_true;
 
-%% 3. Define Problem Structure for SSNCVX
+lb_val = 0;
+ub_val = Inf;
 
-% Initial guess
-x0 = zeros(n, 1);
+%% pblk setting for box constraints
+% p(x) for lb <= x <= ub
+pblk{1} = struct;
+pblk{1}.type = 'box';
+pblk{1}.size = n;
+pblk{1}.l = lb_val * ones(n, 1);
+pblk{1}.u = ub_val * ones(n, 1);
 
-% Objective function (f)
-f = cell(1);
-f{1} = struct('type', 'square', 'size', n, 'coefficient', 0.5);
+%% Q and C setting for the quadratic objective
+% The objective is 0.5*x'*Q*x + c'*x
+Q_in = Q;
+C_in = {c};
 
-% Constraints (pblk)
-pblk = cell(1);
-pblk{1} = struct('type', 'l2', 'size', n);
+%% At, lb, ub setting for equality constraints
+% Ax = b
+At_in = {A'};
+lb_eq = b;
+ub_eq = b;
 
-% Constraint matrices
-At = {A'};
+%% Initial solver options
+opts = struct(); % Use default options
+opts.m = m;
 
-% Constraint bounds
-lb = b;
-ub = b;
+%% Call the solver
+fprintf('Solving a small QP problem...\n');
+[xopt, out] = SSNCVX([], pblk, [], [], Q_in, C_in, [], [], At_in, lb_eq, ub_eq, opts);
 
-%% 4. Run the Solver
+%% Display results
+fprintf('Solver finished.\n');
+fprintf('Total time: %f seconds\n', out.totaltime);
+fprintf('Constraint violation ||Ax-b||: %e\n', norm(A*xopt.var{1} - b));
 
-[xopt, out] = SSNCVX(x0, pblk, [], f, Q, {c}, {l}, {u}, At, lb, ub, opts);
-
-%% 5. Display the Results
-
-fprintf('Solver terminated in %d iterations.\n', out.iter);
-fprintf('Optimal objective value: %f\n', out.obj(end));
-fprintf('Optimal solution x:\n');
-disp(xopt.var{1});
+% The optimal solution is in xopt.var{1}
+fprintf('Optimal x (first 5 elements): \n');
+disp(xopt.var{1}(1:5));
 ```
 
 ### SOCP
 
-Second-Order Cone Programming (SOCP) is a class of convex optimization problems that includes Linear Programming (LP) and Quadratic Programming (QP) as special cases. SOCP problems involve minimizing a linear function over an intersection of affine sets and second-order cones.
+Second-Order Cone Programming (SOCP) is a class of convex optimization problems that includes Linear Programming (LP) as special cases. SOCP problems involve minimizing a linear function over an intersection of affine sets and second-order cones.
 
 --------------
 **The Problem**
@@ -442,25 +459,12 @@ subject to  A * x = b
 
 Where `K` is a product of simple cones (e.g., non-negative, second-order).
 
-Let's solve a simple SOCP. We want to find the point `(x, y)` in the first quadrant of the unit circle that maximizes the sum `x + y`.
-
-This can be formulated as:
-
-- **Objective:** `maximize x + y` (or `minimize -x - y`)
-- **Constraints:**
-    - `sqrt(x² + y²) <= 1` (point is inside the unit circle)
-    - `x >= 0, y >= 0` (point is in the first quadrant)
-
-To fit this into the solver's format, we introduce a variable `t` and formulate the problem in 3D space `(t, x, y)`.
-
-- **Variable:** `z = [t; x; y]`
-- **Objective:** `minimize -x - y`, which is `[0, -1, -1]' * z`
-- **Constraints:**
-    - `sqrt(x² + y²) <= t` (This is the definition of the second-order cone)
-    - `t = 1` (We are interested in the slice of the cone at `t=1`)
-    - `x >= 0, y >= 0`
-
-The solution should be `x = y = 1/sqrt(2)`. 
+Let's solve a simple SOCP:
+```
+minimize    x1 + x2 + 2*x3
+subject to  x1 + 2*x2 + 3*x3 = 1
+            ||[x2; x3]|| <= x1
+```
 
 --------------
 **MATLAB Implementation**
@@ -468,150 +472,78 @@ The solution should be `x = y = 1/sqrt(2)`.
 Here is the MATLAB script to define and solve this problem.
 
 ```matlab
-% Add the solver to your MATLAB path
-addpath(genpath('path/to/your/SSNCVX'));
+%% Tutorial for Second-Order Cone Programming (SOCP)
+% This script demonstrates how to solve an SOCP problem using SSNCVX.
+% The problem is defined as:
+%
+% min c'*x
+% s.t. A*x = b
+%      x in K
+%
+% where K is a product of second-order cones.
+% K = K_1 x K_2 x ... x K_L
+% K_j = {x_j = (t_j; v_j) | ||v_j||_2 <= t_j}
+%
+% We will solve a simple SOCP problem:
+% min x1 + x2 + 2*x3
+% s.t. x1 + 2*x2 + 3*x3 = 1
+%      ||[x2; x3]|| <= x1
 
-%% 1. Define the Problem Data
+clear;clc;
+addpath(genpath('../'));
 
-% Objective function: minimize -x - y
-C = {[0; -1; -1]};
+%% Problem Data Construction
+% min x1 + x2 + 2*x3  => c = [1; 1; 2]
+C = {[1; 1; 2]};
+n = 3;
 
-% Linear constraint: t = 1
-At = {[1; 0; 0]};
+% s.t. x1 + 2*x2 + 3*x3 = 1 => A = [1 2 3], b = 1
+At = {[1; 2; 3]};
 lb = 1;
 ub = 1;
+m = 1;
 
-% Box constraints: x >= 0, y >= 0
-% For t, we have no bounds (-inf, inf)
-l = {[-inf; 0; 0]};
-u = {[inf; inf; inf]};
+% s.t. ||[x2; x3]|| <= x1
+% This defines a second-order cone constraint on x = [x1; x2; x3].
+% The cone is of size 3.
+pblk{1} = struct;
+pblk{1}.type = 'q'; % 'q' for quadratic or second-order cone
+pblk{1}.size = 3;
+pblk{1}.coefficient = 1; % Not used in this context, but required
 
-%% 2. Set up the Solver Options
+% The K structure is also needed by the solver options
+K{1} = struct;
+K{1}.type = 'q';
+K{1}.size = 3;
 
+%% Initial guess and solver options
 opts = struct();
-opts.maxits = 100;
-opts.stoptol = 1e-7;
+opts.method = 'direct';
+opts.K = K;
+opts.m = m;
 
-%% 3. Define Problem Structure for SSNCVX
+%% Call the solver
+fprintf('Solving a small SOCP problem...\n');
+% For SOCP, the structure of the call is similar to QP.
+% We pass empty placeholders for unused arguments.
+[xopt, out] = SSNCVX([], pblk, [], [], [], C, [], [], At, lb, ub, opts);
 
-% Initial guess (not needed, can be empty)
-x0 = [];
+%% Display results
+fprintf('Solver finished.\n');
+fprintf('Total time: %f seconds\n', out.totaltime);
 
-% Define the second-order cone constraint on our variable z = [t; x; y]
-pblk = cell(1);
-pblk{1} = struct('type', 'q', 'size', 3);
+% The optimal solution is in xopt.var{1}
+sol = xopt.var{1};
+fprintf('Optimal solution x = [%f, %f, %f]\n', sol(1), sol(2), sol(3));
 
-%% 4. Run the Solver
-
-[xopt, out] = SSNCVX(x0, pblk, [], [], [], C, l, u, At, lb, ub, opts);
-
-%% 5. Display the Results
-
-solution = xopt.var{1};
-
-fprintf('Solver terminated in %d iterations.\n', out.iter);
-fprintf('Optimal objective value: %f\n', out.obj(end));
-fprintf('Optimal solution (t, x, y):\n');
-disp(solution);
-```
-
-### SPCA
-
-Sparse Principal Component Analysis (SPCA) is a modern variant of PCA that aims to find principal components with a small number of non-zero entries. This is highly desirable in high-dimensional settings (e.g., genomics, finance) where interpretability is key. By forcing the loadings to be sparse, we can identify which original features are most important for explaining the variance.
-
---------------
-**The Problem**
-
-One common formulation for finding a single sparse principal component is:
-
-```
-maximize    x' * A * x
-subject to  ||x||_2 <= 1
-            ||x||_1 <= k
-```
-
-Where:
-- `A` is the sample covariance matrix of the data.
-- `x` is the principal component (loading vector) we are looking for.
-- `||x||_2 <= 1` is the standard PCA unit norm constraint.
-- `||x||_1 <= k` is the sparsity-inducing L1-norm constraint, where `k` controls the sparsity.
-
-This problem can be reformulated and solved as a semidefinite program (SDP), but for this solver, we can often tackle it more directly using its specialized structure.
-
---------------
-**MATLAB Implementation**
-
-In this tutorial, we will generate a synthetic dataset where the first principal component is sparse. Then, we will use the solver to recover it.
-
-```matlab
-% Add the solver to your MATLAB path
-addpath(genpath('path/to/your/SSNCVX'));
-
-%% 1. Generate Synthetic Data
-
-p = 100; % Number of features
-n = 80;  % Number of samples
-
-% Create a sparse principal component
-v1 = zeros(p, 1);
-v1([1, 10, 20, 30, 40]) = 1;
-v1 = v1 / norm(v1);
-
-% Generate data with this component
-Data = randn(n, p);
-Data = Data - (Data * v1) * v1'; % Project out v1
-Data = Data + (20 * randn(n, 1)) * v1'; % Add strong v1 component
-
-% Compute the sample covariance matrix
-A = cov(Data);
-
-%% 2. Set up the Solver Options
-
-lambda = 0.5; % Sparsity-controlling parameter
-
-opts = struct();
-opts.maxits = 500;
-opts.stoptol = 1e-5;
-
-%% 3. Define Problem Structure for SSNCVX
-
-% We want to maximize x'Ax, which is equivalent to minimizing -x'Ax
-% This is a quadratic objective.
-Q = -A;
-
-% Initial guess
-x0 = randn(p, 1); x0 = x0/norm(x0);
-
-% Define the constraints
-pblk = cell(2,1);
-% L2-norm ball constraint: ||x||_2 <= 1
-pblk{1} = struct('type', 'l2', 'size', p, 'ub', 1);
-% L1-norm ball constraint (sparsity): ||x||_1 <= k
-% We use the 'l1' block for this.
-pblk{2} = struct('type', 'l1', 'size', p, 'ub', sqrt(5) + 0.5); % k = sqrt(non-zero elements)
-
-%% 4. Run the Solver
-
-% No linear terms or constraints, so most arguments are empty.
-[xopt, out] = SSNCVX({x0}, pblk, [], [], Q, [], [], [], [], [], [], opts);
-
-solution = xopt.var{1};
-
-%% 5. Display the Results
-
-% Clean up small values for better visualization
-solution(abs(solution) < 1e-4) = 0;
-
-fprintf('Solver terminated in %d iterations.\n', out.iter);
-fprintf('Number of non-zero elements in recovered component: %d\n', nnz(solution));
-
-% Plot the true and recovered components
-figure;
-stem(v1, 'b', 'DisplayName', 'True Component');
-hold on;
-stem(solution, 'r--', 'DisplayName', 'Recovered Component');
-legend;
-title('Sparse Principal Component Recovery');
+% Verify constraints
+fprintf('Constraint violation ||Ax-b||: %e\n', norm(At{1}'*sol - lb));
+fprintf('SOCP constraint: x1 = %f, ||[x2;x3]|| = %f\n', sol(1), norm(sol(2:3)));
+if sol(1) >= norm(sol(2:3)) - 1e-6
+    fprintf('SOCP constraint is satisfied.\n');
+else
+    fprintf('SOCP constraint is VIOLATED.\n');
+end
 ```
 
 ### LRMC
@@ -647,76 +579,89 @@ minimize (1/2) * ||P_Ω(X) - P_Ω(M)||_F² + λ * ||X||_*
 In this tutorial, we will generate a low-rank matrix, sample a fraction of its entries, and then use the SSNCVX solver to recover the full matrix.
 
 ```matlab
-% Add the solver to your MATLAB path
-addpath(genpath('path/to/your/SSNCVX'));
+%% Tutorial for Low-Rank Matrix Completion (LRMC)
+% This script demonstrates how to solve a matrix completion problem using SSNCVX.
+% The problem is defined as:
+%
+% min ||X||_*
+% s.t. P_Omega(X) = P_Omega(M)
+%
+% where ||.||_* is the nuclear norm (sum of singular values),
+% M is the original matrix, and Omega is the set of observed entries.
+% The solver addresses the formulation:
+% min 0.5 * || P_Omega(X) - P_Omega(M) ||_F^2 + lambda * ||X||_*
 
-%% 1. Generate Synthetic Low-Rank Data
+clear;clc;
+addpath(genpath('../'));
 
-n1 = 100; % Matrix rows
-n2 = 100; % Matrix columns
-rank = 5;  % Rank of the matrix
-
+%% Problem Data Construction
 % Create a low-rank matrix
+n1 = 10;
+n2 = 10;
+rank = 2;
+rng(42);
 M = randn(n1, rank) * randn(rank, n2);
 
-% Create a sampling mask (observe 50% of entries)
-sampling_ratio = 0.5;
-Omega = rand(n1, n2) < sampling_ratio;
-
-% Observed data
+% Create a mask for observed entries (50% observed)
+p = 0.5;
+Omega = rand(n1, n2) < p;
 M_observed = M .* Omega;
 
-%% 2. Set up the Solver Options
+lambda = 0.1; % Regularization parameter
 
-lambda = 10; % Regularization parameter
+%% pblk setting for the nuclear norm penalty
+% p(X) = lambda * ||X||_*
+pblk{1} = struct;
+pblk{1}.type = 'nuclear';
+pblk{1}.size = [n1, n2];
+pblk{1}.coefficient = lambda;
 
-opts = struct();
-opts.maxits = 500;
-opts.stoptol = 1e-4;
-opts.method = 'iterative'; % Use an iterative solver for the subproblem
-
-%% 3. Define Problem Structure for SSNCVX
-
-% Initial guess (a matrix of zeros)
-X0 = zeros(n1, n2);
-
-% Regularizer (pblk) - Nuclear norm
-pblk = cell(1);
-pblk{1} = struct('type', 'nuclear', 'size', [n1, n2], 'coefficient', lambda);
-
-% Objective function (f) - Least squares data fidelity
-f = cell(1);
-f{1} = struct('type', 'square', 'size', [n1, n2], 'coefficient', 0.5, 'shift', -M_observed);
-
-% Sampling operator (B)
-B.Bmap = @(u) u .* Omega;
-B.BTmap = @(y) y .* Omega;
+%% Bmap and BTmap for the sampling operator
+B.Bmap = @(X) X .* Omega;
+B.BTmap = @(Y) Y .* Omega;
 B.out_size = [n1, n2];
 
-%% 4. Run the Solver
+%% f setting for the data fitting term
+% f(y) = 0.5 * ||y - M_observed||_F^2 where y = Bmap(X)
+f{1} = struct;
+f{1}.type = 'square';
+f{1}.size = [n1, n2];
+f{1}.coefficient = 0.5;
+f{1}.shift = M_observed;
 
-[Xopt, out] = SSNCVX(X0, pblk, B, f, [], [], [], [], [], [], [], opts);
+%% Initial guess and solver options
+x0 = zeros(n1, n2);
+opts = struct(); % Use default options
 
-recovered_matrix = Xopt.var{1};
+%% Call the solver
+fprintf('Solving a small Matrix Completion problem...\n');
+[xopt, out] = SSNCVX(x0, pblk, B, f, [], [], [], [], [], [], [], opts);
 
-%% 5. Display the Results
+%% Display results
+fprintf('Solver finished.\n');
+fprintf('Total time: %f seconds\n', out.totaltime);
+fprintf('Relative recovery error: %f\n', norm(xopt.var{1} - M, 'fro') / norm(M, 'fro'));
 
-% Calculate the relative recovery error
-recovery_error = norm(recovered_matrix - M, 'fro') / norm(M, 'fro');
-
-fprintf('Solver terminated in %d iterations.\n', out.iter);
-fprintf('Relative recovery error: %.4f\n', recovery_error);
-
-% Visualize the matrices
+% Visualize the results
 figure;
-subplot(1, 3, 1); imagesc(M); title('Original Matrix'); axis off;
-subplot(1, 3, 2); imagesc(M_observed); title('Observed Entries'); axis off;
-subplot(1, 3, 3); imagesc(recovered_matrix); title('Recovered Matrix'); axis off;
-colormap('gray');
+subplot(1, 3, 1);
+imagesc(M);
+title('Original Matrix');
+axis square;
+
+subplot(1, 3, 2);
+imagesc(M_observed);
+title('Observed Matrix');
+axis square;
+
+subplot(1, 3, 3);
+imagesc(xopt.var{1});
+title('Recovered Matrix');
+axis square;
 ```
+![lrmc](./assets/tutorial_lrmc.png)
 
 ## References
-
 
 If SSNCVX is useful in your research, please cite [our paper](#):
 
@@ -728,8 +673,8 @@ If SSNCVX is useful in your research, please cite [our paper](#):
 We hope that the package is useful for your application. If you have any bug reports or comments, please feel free to email one of the toolbox authors:
 
  * Zhanwang Deng, dzw_opt2022 at stu.pku.edu.cn
- * Tao Wei, weitao at pku.edu.cn
- * Jirui Ma, majr at pku.edu.cn
+ * Tao Wei, weit at pku.edu.cn
+ * Jirui Ma, majirui at pku.edu.cn
  * Zaiwen Wen, wenzw at pku.edu.cn
 
 # License
