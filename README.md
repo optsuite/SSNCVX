@@ -22,7 +22,7 @@ where $p(\mathbf{x})$ is a convex and nonsmooth function,  $\mathcal{A}: \mathca
 
 
 Here we list some examples of the problem.
-![图片描述](./assets/problem.jpg)
+![图片描述](./problem.jpg)
 
 ## Installation
 
@@ -243,7 +243,7 @@ legend('True Signal', 'Recovered Signal');
 title('Lasso: True vs. Recovered Signal');
 grid on;
 ```
-![lasso](./assets/tutorial_lasso.png)
+![lasso](./tutorial_lasso.png)
 
 ### Fused Lasso
 
@@ -340,7 +340,7 @@ legend('True Signal', 'Recovered Signal');
 title('Fused Lasso: True vs. Recovered Signal');
 grid on;
 ```
-![fused](./assets/tutorial_fused.png)
+![fused](./tutorial_fused.png)
 
 ### QP
 
@@ -659,7 +659,7 @@ imagesc(xopt.var{1});
 title('Recovered Matrix');
 axis square;
 ```
-![lrmc](./assets/tutorial_lrmc.png)
+![lrmc](./tutorial_lrmc.png)
 
 ## References
 
