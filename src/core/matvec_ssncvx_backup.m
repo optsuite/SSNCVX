@@ -54,14 +54,9 @@ for p = 1: length(params.pblk)
                 tmp3 = par.D4{p}.P2*(0.5*par.D11{p}*tmp1 + tmp2);
                 tmp =  par.D11{p}*Aty-tmp3-tmp3';
             end
-            % Ax1 = Ax1 + par.sigma*AXfun(params.K{p}, params.At{p}, tmp);
         elseif (rr == n)
             tmp = Aty;
-            % Ax1 = Ax1 + par.sigma*AXfun(params.K{p}, params.At{p}, tmp);
         end
-        % Ax2 = Ax2 + par.sigma*params.Bmap(tmp);
-        % Ax3 = Ax3 + par.sigma*params.idmap(tmp);
-        % Ax4 = Ax4 - params.Qmap(par.sigma*tmp );
     elseif strcmp(cone.type, 'q')
         if (~isempty(par.D12))
             Aty = At{p} * y1;
@@ -85,17 +80,9 @@ for p = 1: length(params.pblk)
         Aty = params.At{p}*y1 + params.BTmap(y2)  + params.idmap(y3) - tmpq4;
         tmp = par.b2lD.*Aty;
     elseif strcmp(cone.type,'l1') || strcmp(cone.type, 'linfty') || strcmp(cone.type, 'max') || strcmp(cone.type, 'box') || strcmp(cone.type, 'topk') || strcmp(cone.type, 'l1topk') || strcmp(cone.type, 'l1con') || strcmp(cone.type, 'linftycon')  || strcmp(cone.type, 'l1linfty') || strcmp(cone.type, 'huber')
-        % Aty = Atyfun(cone, params.At{p}, y1)+ params.BTmap(y2) + params.idmap(y3) - params.Qmap(y4) ;
         tmpq4 = params.Qcmap(y4);
         Aty = params.ATmap(y1)+ params.BTmap(y2) + params.idmap(y3) - tmpq4;
-        % if iscell(Aty)
-        % Aty = Aty{1};
-        % end
         tmp = par.tD4{p}.*Aty;
-        % Ax1 = Ax1 + par.sigma*params.Amap(tmp);
-        % Ax2 = Ax2 + par.sigma*params.Bmap(tmp);
-        % Ax3 = Ax3 + par.sigma*params.idmap(tmp);
-        % Ax4 = Ax4 - params.Qcmap(par.sigma*tmp );
     elseif strcmp(cone.type,'l2') 
         tmpq4 = params.Qcmap(y4);
         Aty = params.ATmap(y1)+ params.BTmap(y2) + params.idmap(y3) - tmpq4;
@@ -104,10 +91,6 @@ for p = 1: length(params.pblk)
         else
             tmp = par.tD4coe1 *Aty + par.tD4coe2 *par.D4{p}.X'*Aty{p}*par.D4{p}.X;
         end
-        % Ax1 = Ax1 + par.sigma*params.Amap(tmp);
-        % Ax2 = Ax2 + par.sigma*params.Bmap(tmp);
-        % Ax3 = Ax3 + par.sigma*params.idmap(tmp);
-        % Ax4 = Ax4 - params.Qcmap(par.sigma*tmp );
     elseif strcmp(cone.type,'l1l2')
         tmpq4 = params.Qcmap(y4);
         tmp2 = y2{1};
@@ -118,10 +101,6 @@ for p = 1: length(params.pblk)
                 tmp(:,j) = par.tD4coe1(j) *Aty(:,j) + par.tD4coe2(j) *par.D4{p,j}.X'*Aty(:,j)*par.D4{p,j}.X;
             end
         end
-        % Ax1 = Ax1 + par.sigma*params.Amap(tmp);
-        % Ax2 = Ax2 + par.sigma*params.Bmap(tmp);
-        % Ax3 = Ax3 + par.sigma*params.idmap(tmp);
-        % Ax4 = Ax4 - params.Qmap(par.sigma*tmp );
     elseif strcmp(cone.type,'nuclear') || strcmp(cone.type, 'l2l2')
         tmpq4 = params.Qcmap(y4);
         tmp2 = params.BTmap(y2);
@@ -157,10 +136,6 @@ for p = 1: length(params.pblk)
             end
             tmp = H11 + H12 + H21 + H13;
         end
-        % Ax1 = Ax1 + par.sigma*params.Amap(tmp);
-        % Ax2 = Ax2 + par.sigma*params.Bmap(tmp);
-        % Ax3 = Ax3 + par.sigma*params.idmap(tmp);
-        % Ax4 = Ax4 - params.Qmap(par.sigma*tmp );
     end
     if strcmp(cone.type,'s')
         Ax1 = Ax1 + par.sigma*AXfun(params.K{p}, params.At{p}, tmp);
@@ -212,7 +187,6 @@ if isfield(par,'tD2')
 else
     out.Ax2 = Ax2 + yorg2 .*  (par.epsilon2) ;
 end
-
 
 if isfield(par,'tD3')
     out.Ax3 = Ax3 + yorg3*  par.epsilon3 + par.tD3.*yorg3 ;

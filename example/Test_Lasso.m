@@ -10,7 +10,6 @@ problemtype = 'Lasso';
 datadir = '../data/Lasso';
 fname{1} = 'uci_CT';
 fname{2} = 'E2006.test';
-fname{3} = 'E2006.train';
 for i = 12% 1  3 11 12
     %% One block problem
     probname = [datadir,filesep,fname{i}];

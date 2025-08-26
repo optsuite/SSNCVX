@@ -123,6 +123,7 @@ else
 end
 end
 
+% D\tilde{D}^{-1} operator
 function tmp2 = DPhi2(D2,tx2,taux2)
 if isfield( D2,'type') &&  D2.type == 2
     tmpcoe = taux2 + (D2.nrmx - D2.sigma*D2.coefficient)/D2.sigma*D2.nrmx;
@@ -136,6 +137,7 @@ else
 end
 end
 
+% \tilde{D}^{-1} operator
 function dx2 = DPhi3(D2,D2y,dz,Fx2,taux2)
 iHWx = D2;
 if iHWx.type == 1

@@ -219,7 +219,6 @@ if isfield(params.D,'D3')
         tx3{i}(params.D.D3{i}==0) = 0;
     end
     tmp3 = tx3/taux3;
-    % tmp3 = sigma * params.D.D3{p} ./ (1 + sigma * taux3 - params.D.D3{p}).*tx3;
     rhs.rhsr = tmp4-tmp3-Fr;
 else
 
@@ -274,12 +273,6 @@ for k = 1:params.nblock
     elseif strcmp(cone.type, 'l1l2')
         for j = 1: cone.size(2)
             tmpcoe = 1/(taux4 + iHW{p}.coefficient/iHW{p}.nrmx/iHWy.D4{k}.sigma);
-            % tmpcoe = 1/(taux4 + iHW{p}.coefficient/iHW{p}.nrmx);
-            % tmpcoe2 = iHWy.D4{k}.sigma*iHWy.D4{k}.coefficient/iHWy.D4{k}.nrmx;
-            % iHWy.tD4coe1(j) =  tmpcoe*(1 - 2*tmpcoe2 + (tmpcoe2)^2) + iHWy.D4{k}.sigma*(1 - tmpcoe2);
-            % iHWy.tD4coe2(j) =  tmpcoe*(2*tmpcoe2 - (tmpcoe2)^2 + iHWy.D4{k}.coefficient/taux4/iHWy.D4{k}.nrmx)  + iHWy.D4{k}.sigma*tmpcoe2;
-            % iHWy.D11{k,1}(j) =  tmpcoe*(1 - 2*tmpcoe2 + (tmpcoe2)^2) + iHWy.D4{k}.sigma*(1 - tmpcoe2);
-            % iHWy.D12{k,1}(j) =  tmpcoe*(2*tmpcoe2 + (tmpcoe2)^2 + iHWy.D4{k}.coefficient/taux4/iHWy.D4{k}.nrmx)  + iHWy.D4{k}.sigma*tmpcoe2;
             iHWy.D11{k,1}(j) = (tmpcoe + iHWy.D4{k}.sigma)*(1 - iHWy.D4{k}.coefficient/iHWy.D4{k}.nrmx);
             iHWy.D12{k,1}(j) = tmpcoe*(2*iHWy.D4{k}.coefficient/iHWy.D4{k}.nrmx + iHWy.D4{k}.coefficient/iHWy.D4{k}.nrmx/iHWy.D4{k}.sigma/taux4 - iHW{p}.coefficient^2/iHWy.D4{k}.nrmx^2  ) + iHWy.D4{k}.sigma*iHW{p}.coefficient/iHWy.D4{k}.nrmx;
         end
@@ -360,9 +353,6 @@ for p =1:params.nblock
             tmpcoe = 1/(taux2 + D2.coefficient/D2.nrmx);
             iHWy.D11{p} = (tmpcoe + iHWy.D2{k}.sigma)*(1 - iHWy.D2{k}.coefficient/iHWy.D2{k}.nrmx);
             iHWy.D12{p} = tmpcoe*(2*iHWy.D2{k}.coefficient/iHWy.D2{k}.nrmx + iHWy.D2{k}.coefficient/iHWy.D2{k}.nrmx/iHWy.D2{k}.sigma/taux4 - iHWy.D2{k}.coefficient^2/iHWy.D2{k}.nrmx^2  ) + iHWy.D2{k}.sigma*iHWy.D2{k}.coefficient/iHWy.D2{k}.nrmx;
-            % tmpcoe2 = iHWy.D2{k}.sigma*iHWy.D2{k}.coefficient/iHWy.D2{k}.nrmx;
-            % iHWy.D21{p} =  tmpcoe*(1 - 2*tmpcoe2 + (tmpcoe2)^2) + iHWy.D2{k}.sigma*(1 - tmpcoe2);
-            % iHWy.D22{p} =  tmpcoe*(2*tmpcoe2 - (tmpcoe2)^2 + iHWy.D2{k}.coefficient/taux2/iHWy.D2{k}.nrmx)  + iHWy.D2{k}.sigma*tmpcoe2;
         elseif strcmp(params.f{p}.type,'l2con')
             D2 = params.D.D2{p};
             tmpcoe = taux2 + (iHWy.D2{k}.nrmx - iHWy.D2{k}.sigma*iHWy.D2{k}.coefficient)/iHWy.D2{k}.sigma*iHWy.D2{k}.nrmx;

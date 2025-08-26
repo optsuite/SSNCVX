@@ -7,14 +7,9 @@ addpath(genpath('../'));
 clear
 problemtype = 'QP';
 datadir = '../data/QP/';
-fname = {    'AUG2D','AUG2DC','AUG2DCQP','AUG2DQP'};
+fname = {'AUG2D','AUG2DC','AUG2DCQP','AUG2DQP'};
 seed = 2025;
 rng(seed);
-total = [];
-totalobj = [];
-totalpinf = [];
-totaldinf = [];
-totalK1 = [];
 for i = 1:length(fname)% 1  3 11 12
     %% One block problem
     probname = [datadir,filesep,fname{i}];
@@ -86,11 +81,6 @@ for i = 1:length(fname)% 1  3 11 12
 
     [xopt, out] = SSNCVX(x0,pblk,[],[],Q,C,[],[],At,lb,ub,opts);
 
-    total = [total out.totaltime];
-    totalobj = [totalobj out.pobj];
-    totalpinf = [totalpinf out.pinf];
-    totaldinf = [totaldinf out.dinf];
-    totalK1 = [totalK1 out.K1];
     0.5*norm(xopt.var{1},2)^2 + norm(xopt.var{1}-5,1) + dot_ssn(xopt.var{1},C)
 
 end

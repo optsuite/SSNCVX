@@ -124,19 +124,13 @@ for i = 1:plength
         out{i,1} = zeros(size(tmp{i}));
         %     Aty = Atyfun_sdpnal(pblk,At{i},y1) + y2;
         if (rr > 0 )
-            % iy = fft(y,[],3);
-            % tmp1 = compute_svd(params.U1T,iy,params.V1,1);
             tmp1 = iHW{i}.U1T*tmp{i}*iHW{i}.V1;
             if rr < n1/2
                 tmp2 = iHW{i}.U1T*tmp{i}*iHW{i}.V2;
                 tmp3 = iHW{i}.U2T*(tmp{i}*iHW{i}.V1);
-                % tmp2 = compute_svd(iHW{i}ams.U1T,iy,iHW{i}ams.V2,1);
-                % tmp3 = compute_svd(iHW{i}ams.U2T,iy,iHW{i}ams.V1,2);
             else
                 tmp2 = iHW{i}.U1T*(tmp{i}*iHW{i}.V2);
                 tmp3 = iHW{i}.U2T*tmp{i}*iHW{i}.V1;
-                % tmp2 = compute_svd(iHW{i}ams.U1T,iy,iHW{i}ams.V2,2);
-                % tmp3 = compute_svd(iHW{i}ams.U2T,iy,iHW{i}ams.V1,1);
             end
             tmp11 = tmp1.* iHW{i}.tDsch11 + tmp1'.* iHW{i}.tHsch11;
             tmp12 = tmp2.* iHW{i}.tDsch12 + tmp3'.* iHW{i}.tHsch12;

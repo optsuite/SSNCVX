@@ -13,12 +13,14 @@ addpath(genpath(test_dir));
 dir_data = "../data/";
 dir_logs = 'logs';
 dataset = "DIMACS";
-probnames = ["nb", "nb_L1", "nb_L2", "nb_L2_bessel", "nql180", "nql30", "nql60", "qssp180", "qssp30", "qssp60", "sched_100_100_orig", "sched_100_100_scaled", "sched_100_50_orig", "sched_100_50_scaled", "sched_200_100_orig", "sched_200_100_scaled", "sched_50_50_orig", "sched_50_50_scaled"];
+% probnames = ["nb", "nb_L1", "nb_L2", "nb_L2_bessel", "nql180", "nql30", "nql60", "qssp180", "qssp30", "qssp60", "sched_100_100_orig", "sched_100_100_scaled", "sched_100_50_orig", "sched_100_50_scaled", "sched_200_100_orig", "sched_200_100_scaled", "sched_50_50_orig", "sched_50_50_scaled"];
 % save_root = strcat(dir_results,'/' ,dataset);
+probnames = ["nb", "nb_L2"];
+
 table_str = [];
 timegeo = [];
 file_len = length(probnames);
-for i = 5
+for i = 2
     %% One block problem
     probname = probnames{i};
     model = SOCPdata2model(dataset,probname,dir_data);

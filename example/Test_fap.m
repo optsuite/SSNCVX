@@ -4,9 +4,7 @@
 %% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
 %%
 clear;
-root_dir = '../..';
 test_dir = '..';
-addpath([root_dir]);
 addpath(genpath(test_dir));
 
 dir_data = addpath_data();

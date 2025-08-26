@@ -10,8 +10,7 @@ problemtype = 'Lasso';
 datadir = '../data/Lasso';
 fname{1} = 'uci_CT';
 fname{2} = 'E2006.test';
-fname{3} = 'E2006.train';
-for i = 12
+for i = 2
     %% One block problem
     probname = [datadir,filesep,fname{i}];
     fprintf('\n Problem name: %s \n', fname{i});
@@ -25,7 +24,7 @@ for i = 12
 
     [m,n] = size(A);
     Bt = A';
-    crho = 1e-3;%
+    crho = 1e-3;
     lambdamax=norm(Bt*b,'inf');
     lambda=crho*lambdamax;
 

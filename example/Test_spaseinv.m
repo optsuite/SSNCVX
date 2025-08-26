@@ -12,7 +12,6 @@ fname{2} = 'CONT-101';
 fname{3} = 'CONT-201';
 fname{4} = 'CVXQP3_L';
 fname{5} = 'LISWET5';
-fname{6} = 'LISWET11';
 seed = 2024;
 rng(seed);
 for i = 1
@@ -26,7 +25,6 @@ for i = 1
         fprintf('\n ');
         return
     end
-    [m,n] = size(AE);
     A =AE;
     b = A*ones(size(A,2),1);
     C = cell(1);

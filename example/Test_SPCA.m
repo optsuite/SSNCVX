@@ -5,19 +5,16 @@
 %%
 clear;
 % clc;
-root_dir = '../..';
 test_dir = '..';
-addpath([root_dir]);
 addpath(genpath(test_dir));
 dir_data = '../data';
-
 
 dataset = "SPCA";
 probnames = sPCAprobs;
 table_str = [];
 timegeo = [];
 file_len = length(probnames);
-for i = [ 2] 
+for i = [ 1] 
     %% One block problem
     probname = probnames{i};
     model = SDPdata2model(dataset,probname,dir_data);
@@ -36,7 +33,7 @@ for i = [ 2]
     nrmC = norm(model.C);
     C = {-model.C/nrmC};
 
-    %% opts setting
+    % opts setting
     opts.adaplambda = 1;
 
     [m ,n]=size(A);

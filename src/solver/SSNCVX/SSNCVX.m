@@ -559,9 +559,6 @@ for iter = 1:opts.maxits
         end
     end
 
-
-
-
     if Fnew.res < 5e2 * F.res || 1
         count = 0;
         y = ynew;
@@ -779,17 +776,13 @@ if params.boxflag == 1
         tmpl = params.l;
         tmpu = params.u;
     end
-    dualtmp1 = dot_ssn(XN, tmpl) + dot_ssn(XP,tmpu); % sum(XP.*params.u) ;
+    dualtmp1 = dot_ssn(XN, tmpl) + dot_ssn(XP,tmpu); 
 else
     dualtmp1 = 0;
 end
 
 if params.Aboxflag == 1
-    % if params.fap == 1
     dualtmp2 = sum(yN.*params.lb) + sum(yP.*params.ub);
-    % else
-    % dualtmp2 = sum(yN.*params.lb) + sum(yP.*params.ub);
-    % end
 else
     dualtmp2 = 0;
 end
@@ -933,11 +926,11 @@ else
 end
 
 if params.Aboxflag == 1
-    if params.fap == 1
+    % if params.fap == 1
         dualtmp2 = sum(yN.*params.borg) + sum(yP.*params.borg);
-    else
-        dualtmp2 = sum(yN.*params.lb) + sum(yP.*params.ub);
-    end
+    % else
+        % dualtmp2 = sum(yN.*params.lb) + sum(yP.*params.ub);
+    % end
 else
     dualtmp2 = 0;
 end

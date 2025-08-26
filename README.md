@@ -660,6 +660,7 @@ title('Recovered Matrix');
 axis square;
 ```
 ![lrmc](./tutorial_lrmc.png)
+## User defined f or pblk
 
 ## References
 

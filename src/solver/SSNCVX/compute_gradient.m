@@ -1,4 +1,3 @@
-
 function [F,S,x4, params] = compute_gradient(y,z,r,v,x1,x2,x3,x4,params)
 %% compute_gradient: compuate the gradient of the saddle point problem
 %%
@@ -40,15 +39,12 @@ else
     Qv = 0;
 end
 
-
 tmp40 = x4.var + params.sigma*(params.ATmap(y.var) + params.BTmap(z.var) - Qv + params.idmap( r.var) - params.C );
 for i = 1:params.nblock
     if isfield(params.pblk{i},'shift')
         tmp40{i} = tmp40{i} - params.pblk{i}.shift;
     end
 end
-% end
-%%
 
 if isfield(params,'f') && params.fnonsmooth
     [tmp2, D2] = params.prox_f(tmp2,params);
@@ -69,8 +65,6 @@ elseif isfield(params,'f') && ~params.fnonsmooth
         end
     end
 end
-
-
 
 [tmp4, D4] = params.prox_p(tmp40,params);
 S.var = (tmp4 - tmp40)/params.sigma;
@@ -166,9 +160,5 @@ F.Fx4 = (x4.var - tmp4 )/params.sigma;
 
 F.Fx4res = norm(F.Fx4);
 F.res = F.res + F.Fx4res;
-
-
-
-
 
 end

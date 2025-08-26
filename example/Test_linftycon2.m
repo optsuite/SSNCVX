@@ -39,7 +39,6 @@ for i = 1
     f{1}.size = n;
     f{1}.coefficient = 1;
 
-
     % solve
     [xopt, out] = SSNCVX(x0,pblk,Bt,f,[],[],[],[],[],[],[],opts);
     x02{1,1} = x0;

@@ -21,14 +21,14 @@ for i = 12
     opts.sigyu = 0.5;
     x0 = zeros(n1,n2,1);
 
-    %% pblk setting
+    % pblk setting
     pblk{1} = struct;
     pblk{1}.type = 'nuclear';
     pblk{1}.size = [n1,n2];
     pblk{1}.coefficient = 3;
     B.out_size = [n1, n2];
 
-    %% f setting
+    % f setting
     f{1} = struct;
     f{1}.type = 'square';
     f{1}.size = [2*n1,n2];
