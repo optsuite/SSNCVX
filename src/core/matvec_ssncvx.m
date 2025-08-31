@@ -1,15 +1,22 @@
-function [out] = matvec_ssncvx( At, par, q, params)
-%% matvec_ssncvx: compuate the matrix vector operation to solve the linear system
+function [out] = matvec_ssncvx( par, q, params)
+%% matvec_ssncvx: compute the matrix vector operation to solve the linear system
 %%
 %% Copyright (c) 2025 by
 %% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
 %%
+%%  [out] = matvec_ssncvx( par, q, params)
+%%  Input:   par: contain the information of generalized Jacboian. 
+%%            q: the vector that needs to be operated.
+%%     params: a structure that specifies parameters required in matvec_ssncvx.m,
+%%              (if it is not given, the default in SSNCVX is used). 
+%%
+%%  Output:     out : the output infotmation.
+
 if (nargin < 5); AL = []; end
 if isempty(AL); existAL = 0; else; existAL = 1; end
 N = length(q.q1);
 AL = params.Lchol;
 %%
-
 if params.nblock == 1
     yorg1 = q.q1;
     yorg2 = q.q2{1};
@@ -27,8 +34,7 @@ if params.nblock == 1
             y1(AL.perm) = mexbwsolve(AL.Rt,y1);
         end
     end
-
-    %% perform A * (par.sigma * par.Dsch + par.epsilon * identity) * A' * y
+    %% perform A * (par.Dsch + par.epsilon * identity) * A' * y
     Ax1 = zeros(N,1);
     Ax2 = params.z0{1}; %modified
     Ax3 = params.r0{1};
@@ -40,9 +46,7 @@ if params.nblock == 1
         tmpq4 = params.Qmap(y4);
         rr = size(par.D4{p}.P1, 2);
         tmp = zeros(cone.size);
-
         Aty = Atyfun(params.K{p}, params.At{p}, y1) + params.BTmap(y2)  + params.idmap(y3) - tmpq4;
-
         if (rr > 0 && rr < n)
             if (rr <= n/2)
                 tmp0 = par.D4{p}.P1'*Aty;
@@ -75,7 +79,10 @@ if params.nblock == 1
         tmpq4 = params.Qmap(y4);
         Aty = params.At{p}*y1 + params.BTmap(y2)  + params.idmap(y3) - tmpq4;
         tmp = par.D11{p}.*Aty;
-    elseif strcmp(cone.type,'l1') || strcmp(cone.type, 'linfty') || strcmp(cone.type, 'max') || strcmp(cone.type, 'box') || strcmp(cone.type, 'topk') || strcmp(cone.type, 'l1topk') || strcmp(cone.type, 'l1con') || strcmp(cone.type, 'linftycon')  || strcmp(cone.type, 'l1linfty') || strcmp(cone.type, 'huber')
+    elseif strcmp(cone.type,'l1') || strcmp(cone.type, 'linfty') || strcmp(cone.type, 'max') ...
+            || strcmp(cone.type, 'box') || strcmp(cone.type, 'topk') || strcmp(cone.type, 'l1topk') ...
+            || strcmp(cone.type, 'l1con') || strcmp(cone.type, 'linftycon')  || strcmp(cone.type, 'l1linfty') ...
+            || strcmp(cone.type, 'huber')
         tmpq4 = params.Qmap(y4);
         tmpA = params.ATmap(y1);
         if iscell(tmpA)
@@ -153,7 +160,6 @@ if params.nblock == 1
         Ax1 = Ax1 + params.Amap(tmp);
     end
 
-
     if (existAL) && ~AL.isidentity
         if strcmp(AL.matfct_options,'chol')
             Ax1 = AL.Rt \ Ax1(AL.perm);
@@ -161,8 +167,6 @@ if params.nblock == 1
             Ax1 = mexfwsolve(AL.R,Ax1(AL.perm));
         end
     end
-
-
 
     if isfield(par,'tD1')
         out.Ax1 = Ax1 + yorg1 .* (par.tD1 + par.epsilon1);
@@ -175,7 +179,9 @@ if params.nblock == 1
     elseif isfield(par,'tD2') ||  isfield(par,'D21')
         Ax2 = Ax2 + params.Bmap(tmp);
         for p = 1: length(params.pblk)
-            if strcmp(params.f{p}.type,'l1')  || strcmp(params.f{p}.type, 'linfty') || strcmp(params.f{p}.type, 'max') || strcmp(params.f{p}.type, 'topk') || strcmp(params.f{p}.type, 'l1topk')|| strcmp(params.f{p}.type, 'l1con') || strcmp(params.f{p}.type, 'linftycon') || strcmp(params.f{p}.type, 'box')
+            if strcmp(params.f{p}.type,'l1')  || strcmp(params.f{p}.type, 'linfty') || strcmp(params.f{p}.type, 'max') ...
+                    || strcmp(params.f{p}.type, 'topk') || strcmp(params.f{p}.type, 'l1topk')|| strcmp(params.f{p}.type, 'l1con') ...
+                    || strcmp(params.f{p}.type, 'linftycon') || strcmp(params.f{p}.type, 'box')
                 out.Ax2 = Ax2 + yorg2 .* (par.D21{p} + par.epsilon2);
             elseif strcmp(params.f{p}.type,'l2') || strcmp(params.f{p}.type,'l2con')
                 if par.D2{p}.type == 1
@@ -282,7 +288,9 @@ else
             tmpq4 = params.Qcmap(y4);
             Aty = params.At{p}*y1 + params.BTmap(y2)  + params.idmap(y3) - tmpq4;
             tmp = par.D11{p}.*Aty;
-        elseif strcmp(cone.type,'l1') || strcmp(cone.type, 'linfty') || strcmp(cone.type, 'max') || strcmp(cone.type, 'box') || strcmp(cone.type, 'topk') || strcmp(cone.type, 'l1topk') || strcmp(cone.type, 'l1con') || strcmp(cone.type, 'linftycon')  || strcmp(cone.type, 'l1linfty') || strcmp(cone.type, 'huber')
+        elseif strcmp(cone.type,'l1') || strcmp(cone.type, 'linfty') || strcmp(cone.type, 'max') || strcmp(cone.type, 'box') ...
+                || strcmp(cone.type, 'topk') || strcmp(cone.type, 'l1topk') || strcmp(cone.type, 'l1con') ...
+                || strcmp(cone.type, 'linftycon')  || strcmp(cone.type, 'l1linfty') || strcmp(cone.type, 'huber')
             tmpq4 = params.Qcmap(y4);
             Aty = params.ATmap(y1)+ params.BTmap(y2{p}) + params.idmap(y3{p}) - tmpq4;
             tmp = par.D11{p}.*Aty;
@@ -376,7 +384,9 @@ else
     elseif isfield(par,'tD2') ||  isfield(par,'D21')
         Ax2 = Ax2 + params.Bmap(tmp);
         for p = 1: length(params.pblk)
-            if strcmp(params.f{p}.type,'l1')  || strcmp(params.f{p}.type, 'linfty') || strcmp(params.f{p}.type, 'max') || strcmp(params.f{p}.type, 'topk') || strcmp(params.f{p}.type, 'l1topk')|| strcmp(params.f{p}.type, 'l1con') || strcmp(params.f{p}.type, 'linftycon') || strcmp(params.f{p}.type, 'box')
+            if strcmp(params.f{p}.type,'l1')  || strcmp(params.f{p}.type, 'linfty') || strcmp(params.f{p}.type, 'max') ...
+                    || strcmp(params.f{p}.type, 'topk') || strcmp(params.f{p}.type, 'l1topk')|| strcmp(params.f{p}.type, 'l1con') ...
+                    || strcmp(params.f{p}.type, 'linftycon') || strcmp(params.f{p}.type, 'box')
                 out.Ax2 = Ax2 + yorg2 .* (par.D21{p} + par.epsilon2);
             elseif strcmp(params.f{p}.type,'l2') || strcmp(params.f{p}.type,'l2con')
                 if par.D2{p}.type == 1

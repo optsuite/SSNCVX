@@ -1,23 +1,40 @@
-function [xopt, out] = SSNCVX(x0,pblk,Bt,f,Q,C,l,u,At,lb,ub,opts,y,z,v,r)
-%% SSNCVX: The main solver function to solve the multi-block problem
+function [xopt, out] = SSNCVX(x0,pblk,Bt,f,Q,C,l,u,At,lb,ub,opts)
+%% SSNCVX: A primal dual semismooth Newton algorithm based solver function to solve the multi-block problem.
 %%
 %% Copyright (c) 2025 by
 %% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
 %%
-params.pflag = 1;
+%%  [xopt, out] = SSNCVX(x0,pblk,Bt,f,Q,C,l,u,At,lb,ub,opts,y);
+%%  Input:   x0 : the initial point. 
+%%         pblk : a cell array describing the block diagonal structure of p(x) data.
+%%            f : a cell array describing the block diagonal structure of f(x) data.
+%%           At : a cell array with At{p} = [svec(Ap1) ... svec(Apm)].
+%%          l,u : a cell array to denote the upper and lower bound of x.    
+%%        lb,ub : a cell array to denote the upper and lower bound of A(x).  
+%%     Bt,b,C,Q : data for the instance.
+%%     opts: a structure that specifies parameters required in SSNCVX.m,
+%%              (if it is not given, the default in SSNCVX is used). 
+%%
+%%  Output:          xopt : the optimal solution 
+%%          out.totatime  : the total-time
+%%          out.iter      : number of iterations
+%%          out.pobj      : primal objective value,
+%%          out.dobj      : dual objective value,
+%%          out.gap       : realative gap,
+%%          out.pinf      : primal_infeas,
+%%          out.dinf      : dual_infeas,  
 nnls = 5;
 params.fap = 0;
-if isfield(opts,'tol');        tol           = opts.tol; end
-if isfield(opts,'nnls');      nnls           = opts.nnls; end
-if ~isfield(opts, 'nu');             opts.nu = 0.9999;  end
-if ~isfield(opts, 'lambda');     opts.lambda = 1; end
-if ~isfield(opts, 'sigma');     opts.sigma = 1; end
-if ~isfield(opts, 'resmin');     opts.resmin = 1e10; end
-if ~isfield(opts, 'fap');     opts.fap = 0; end
-if ~isfield(opts,'method');   opts.method    = 'iterative'; end
-if ~isfield(opts,'cgmin'); opts.cgmin = 50; end
-if ~isfield(opts,'cgmed'); opts.cgmed = 300; end
-if ~isfield(opts,'cgmax'); opts.cgmax = 300; end
+if isfield(opts,'nnls');     nnls = opts.nnls; end
+if ~isfield(opts, 'nu');     opts.nu = 0.9999;  end
+if ~isfield(opts, 'lambda'); opts.lambda = 1; end
+if ~isfield(opts, 'sigma');  opts.sigma = 1; end
+if ~isfield(opts, 'resmin'); opts.resmin = 1e10; end
+if ~isfield(opts, 'fap');   opts.fap = 0; end
+if ~isfield(opts,'method'); opts.method    = 'iterative'; end
+if ~isfield(opts,'cgmin');  opts.cgmin = 50; end
+if ~isfield(opts,'cgmed');  opts.cgmed = 300; end
+if ~isfield(opts,'cgmax');  opts.cgmax = 300; end
 params.fap = opts.fap;
 
 if ~isfield(opts,'sigyl');  opts.sigyl = 1; end
@@ -62,7 +79,6 @@ if ~isfield(opts,'maxtime');  opts.maxtime = 1e4; end
 if ~isfield(opts,'muopts'); opts.muopts = struct;end
 if ~isfield(opts.muopts,'mu_update_itr');  opts.muopts.mu_update_itr = 10; end
 if ~isfield(opts.muopts,'mu_fact');  opts.muopts.mu_fact = 1; end
-
 if ~isfield(opts,'tol');  opts.tol = 1e-6; end
 if ~isfield(opts,'resratio');  opts.resratio = 1e-4; end
 if ~isfield(opts,'cgtol');  opts.cgtol = 1e-2*opts.tol; end
@@ -91,7 +107,6 @@ else
     params.saveflag = 0;
 end
 
-
 if isempty(pblk)
     error('pblk is not exist');
 else
@@ -118,7 +133,8 @@ if ~isempty(f)
         if ~isfield(f{i},'type')
             error('f exist but the type of f does not exist');
         else
-            if strcmp(f{i}.type,'square') || strcmp(f{i}.type,'exp') || strcmp(f{i}.type,'logdet') || strcmp(f{i}.type,'log') || strcmp(f{i}.type,'logsumexp')
+            if strcmp(f{i}.type,'square') || strcmp(f{i}.type,'exp') || strcmp(f{i}.type,'logdet') ...
+                    || strcmp(f{i}.type,'log') || strcmp(f{i}.type,'logsumexp')
                 params.fnonsmooth = 0;
             else
                 params.fnonsmooth = 1;
@@ -151,9 +167,6 @@ else
     params.Qmap = @(X) 0;
     params.Qcmap = @(X) 0;
 end
-
-
-
 
 if xor(isempty(l),isempty(u))
     error('one box constraint is identified but the other is not');
@@ -434,7 +447,6 @@ params.cgtol = opts.cgtol;
 params.cgratio = opts.cgratio;
 params.resratio = opts.resratio;
 params.tstart = tic;
-[init] = init_parameters(params);
 xzi_x = zeros(nnls, 1);
 [F,~,~,params] = compute_gradient(y,Z,R,V,X1,X2,X3,X4,params);
 nFxz = max(norm(F.Fzres, 'fro'), norm(F.Fx4res, 'fro'));
@@ -449,22 +461,19 @@ for iter = 1:opts.maxits
     if cgopts.CG_adapt
         cgopts.CG_tol = max(min(0.1 * F.res, 0.1)*params.cgratio, params.cgtol)  ; % F.res
     end
+    % set the parameter tau
+    params.NEWT.tau1 = params.NEWT.lambda*((F.Fyres/params.nblock)^params.NEWT.sigPowy)*params.nblock;
+    params.NEWT.tau2 =  params.NEWT.lambda*max(min(((F.Fzres/sqrt(params.nblock))^params.NEWT.sigPowz),opts.resmin),1e-5)+1e-7;
+    params.NEWT.tau3 =  params.NEWT.lambda*(F.Frres^params.NEWT.sigPowr)+1e-7;
+    params.NEWT.tau4 = params.NEWT.lambda*(F.Fvres)^params.NEWT.sigPowv +1e-7;
 
-    params.NEWT.tau1 = init.tau1*params.NEWT.lambda*((F.Fyres/params.nblock)^params.NEWT.sigPowy)*params.nblock;
-    params.NEWT.tau2 =  params.NEWT.lambda*init.tau2*max(min(((F.Fzres/sqrt(params.nblock))^params.NEWT.sigPowz),opts.resmin),1e-5)+1e-7;
-    params.NEWT.tau3 =  init.tau3*params.NEWT.lambda*(F.Frres^params.NEWT.sigPowr)+1e-7;
-    params.NEWT.tau4 = init.tau4*params.NEWT.lambda*(F.Fvres)^params.NEWT.sigPowv +1e-7;
-
-    params.NEWT.taux1 = init.taux1*params.NEWT.lambda*(F.Fx1res^params.NEWT.sigPowx1)+1e-7;
-    params.NEWT.taux2 = init.taux2*params.NEWT.lambda*(F.Fx2res^params.NEWT.sigPowx2)+ 1e-7;
-    params.NEWT.taux3 = init.taux3*params.NEWT.lambda*(F.Fx3res^params.NEWT.sigPowx3)+ 1e-7;
-    params.NEWT.taux4 = params.NEWT.lambda*init.taux4*max(min((F.Fx4res/sqrt(params.nblock))^params.NEWT.sigPowx4,opts.resmin),1e-5);
-
+    params.NEWT.taux1 = params.NEWT.lambda*(F.Fx1res^params.NEWT.sigPowx1)+1e-7;
+    params.NEWT.taux2 = params.NEWT.lambda*(F.Fx2res^params.NEWT.sigPowx2)+ 1e-7;
+    params.NEWT.taux3 = params.NEWT.lambda*(F.Fx3res^params.NEWT.sigPowx3)+ 1e-7;
+    params.NEWT.taux4 = params.NEWT.lambda*max(min((F.Fx4res/sqrt(params.nblock))^params.NEWT.sigPowx4,opts.resmin),1e-5);
 
     [out,params] = getdirectionall(F,params,cgopts);
     params.cgall = params.cgall + params.cgiter;
-
-
 
     ynew.var = y.var + out.dy;
     ynew.Avar = params.ATmap(ynew.var);
@@ -486,7 +495,6 @@ for iter = 1:opts.maxits
 
     [AX] = params.Amap(X4new.var);
     X4new.Avar = AX;
-
 
     %----------------------------------------------------------------------
 
@@ -570,15 +578,12 @@ for iter = 1:opts.maxits
         if params.Aboxflag == 1 && params.Axeqb == 0
             X1 = X1new;
         end
-
         if params.fnonsmooth
             X2 = X2new;
         end
-
         if params.boxflag == 1
             X3 = X3new;
         end
-
         X4 = X4new;
         if iter > 2
             params = sigPow_CGmaxit_updateplus(F.res,params,cgopts);
@@ -591,10 +596,6 @@ for iter = 1:opts.maxits
         params.NEWT.lambda = params.gfactor * params.NEWT.lambda;
         count = count +1;
         continue;
-    end
-    %------------------------------------------------------------------
-    if iter == 36
-        1;
     end
     params = record_optimal_NEWT(y,Z,R,V,S,X4,params,iter);
 
@@ -776,7 +777,7 @@ if params.boxflag == 1
         tmpl = params.l;
         tmpu = params.u;
     end
-    dualtmp1 = dot_ssn(XN, tmpl) + dot_ssn(XP,tmpu); 
+    dualtmp1 = dot_ssn(XN, tmpl) + dot_ssn(XP,tmpu);
 else
     dualtmp1 = 0;
 end
@@ -910,7 +911,6 @@ else
 end
 
 if params.boxflag == 1
-
     if params.fap == 1
         for j = 1:params.nblock
             tmpl{j,1} = max(params.l{j},-1e6);
@@ -926,11 +926,7 @@ else
 end
 
 if params.Aboxflag == 1
-    % if params.fap == 1
-        dualtmp2 = sum(yN.*params.borg) + sum(yP.*params.borg);
-    % else
-        % dualtmp2 = sum(yN.*params.lb) + sum(yP.*params.ub);
-    % end
+    dualtmp2 = sum(yN.*params.lb) + sum(yP.*params.ub);
 else
     dualtmp2 = 0;
 end

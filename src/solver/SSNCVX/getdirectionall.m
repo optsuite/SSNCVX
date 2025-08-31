@@ -4,6 +4,15 @@ function [out, params] = getdirectionall(F,params,cgopts)
 %% Copyright (c) 2025 by
 %% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
 %%
+%%  [out, params] = getdirectionall(F,params,cgopts));
+%%  Input:        F: the nonlinear operator. 
+%%           params: a structure that specifies parameters required in compute_gradient.m,
+%%              (if it is not given, the default in SSNCVX is used). 
+%%           cgopts: parameters of linear equation solver.
+%%
+%%  Output:       out : the update direction
+
+
 tau1 = params.NEWT.tau1;
 tau2 = params.NEWT.tau2;
 tau3 = params.NEWT.tau3;

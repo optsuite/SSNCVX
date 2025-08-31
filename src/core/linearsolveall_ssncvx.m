@@ -3,7 +3,19 @@
 %% Copyright (c) 2025 by
 %% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
 %%
-function  [out,resnrm,solve_ok] = linearsolveall_ssncvx(matvecfname,rhs,par,L,tol,maxit,params)
+%%  [out,resnrm,solve_status] = linearsolveall_ssncvx(matvecfname,rhs,par,L,tol,maxit,params)
+%%  Input:   matvecfname: the matrix vector operator.
+%%            rhs: the right hand side of the equation.
+%%            par: a structer that contains the generalized Jacboian information 
+%%            tol: the tolerance of the accuracy.  
+%%          maxit: the maximum iteration number.
+%%     params: a structure that specifies parameters required in linearsolveall_ssncvx.m,
+%%              (if it is not given, the default in SSNCVX is used). 
+%%
+%%  Output:     out : the output infotmation.
+%%     solve_status : the status of the linear solver.
+%%           resnrm : the residual norm.
+function  [out,resnrm,solve_status] = linearsolveall_ssncvx(matvecfname,rhs,par,L,tol,maxit,params)
 sub_maxit = 100;
 
 
@@ -14,7 +26,7 @@ if strcmp(params.method,'iterative')
         r0 =  params.r0{1};
         v0 =  params.v0{1};
         AL = params.Lchol;
-        solve_ok = 1;
+        solve_status = 1;
         miniter = 1;
         printlevel = 0;
         if isfield(par,'minitpsqmr'); miniter = par.minitpsqmr; end
@@ -53,11 +65,11 @@ if strcmp(params.method,'iterative')
         tiny = 1e-30;
 
         for iter = 1:maxit
-            Aq = feval(matvecfname,params.At,par,q,params);
+            Aq = feval(matvecfname,par,q,params);
 
             sigma = dot_ssn(q.q1,Aq.Ax1) + dot_ssn(q.q2,Aq.Ax2) + dot_ssn(q.q3,Aq.Ax3) + dot_ssn(q.q4,Aq.Ax4);
             if (abs(sigma) < tiny)
-                solve_ok = 2;
+                solve_status = 2;
                 if (printlevel); fprintf('s1'); end
                 break;
             else
@@ -109,7 +121,7 @@ if strcmp(params.method,'iterative')
             end
 
             if (abs(rho_old) < tiny)
-                solve_ok = 2;
+                solve_status = 2;
                 fprintf('s2');
                 break;
             else
@@ -133,8 +145,8 @@ if strcmp(params.method,'iterative')
         out.dz{1} = z2;
         out.dr{1} = z3;
         out.dv{1} = z4;
-        if (iter == maxit); solve_ok = -2; end
-        if (solve_ok ~= -1)
+        if (iter == maxit); solve_status = -2; end
+        if (solve_status ~= -1)
             if (printlevel); fprintf(' '); end
         end
     else
@@ -143,7 +155,7 @@ if strcmp(params.method,'iterative')
         r0 =  params.r0;
         v0 =  params.v0;
         AL = params.Lchol;
-        solve_ok = 1;
+        solve_status = 1;
         miniter = 1;
         printlevel = 0;
         if isfield(par,'minitpsqmr'); miniter = par.minitpsqmr; end
@@ -184,10 +196,10 @@ if strcmp(params.method,'iterative')
         tiny = 1e-30;
 
         for iter = 1:maxit
-            Aq = feval(matvecfname,params.At,par,q,params);
+            Aq = feval(matvecfname,par,q,params);
             sigma = dot_ssn(q.q1,Aq.Ax1) + dot_ssn(q.q2,Aq.Ax2) + dot_ssn(q.q3,Aq.Ax3) + dot_ssn(q.q4,Aq.Ax4);
             if (abs(sigma) < tiny)
-                solve_ok = 2;
+                solve_status = 2;
                 if (printlevel); fprintf('s1'); end
                 break;
             else
@@ -238,7 +250,7 @@ if strcmp(params.method,'iterative')
             end
 
             if (abs(rho_old) < tiny)
-                solve_ok = 2;
+                solve_status = 2;
                 fprintf('s2');
                 break;
             else
@@ -262,8 +274,8 @@ if strcmp(params.method,'iterative')
         out.dz = z2;
         out.dr = z3;
         out.dv = z4;
-        if (iter == maxit); solve_ok = -2; end
-        if (solve_ok ~= -1)
+        if (iter == maxit); solve_status = -2; end
+        if (solve_status ~= -1)
             if (printlevel); fprintf(' '); end
         end
 
@@ -302,7 +314,7 @@ elseif strcmp(params.method,'direct')
             end
         end
 
-        [dy,resnrm,solve_ok] = socp_ldl_solver(opts,rhsz,optcg);
+        [dy,resnrm,solve_status] = socp_ldl_solver(opts,rhsz,optcg);
 
         out.dy = dy;
         for p = 1:length(params.pblk)
@@ -344,7 +356,7 @@ elseif strcmp(params.method,'direct')
         tolpsqmr = const2*tolpsqmr;
         optcg.tol = tolpsqmr;
         optcg.AP = AP;
-        [dz,resnrm,solve_ok,solver] = Classic_Lasso_linsys_solver1(opts,rhsz,optcg);
+        [dz,resnrm,solve_status,solver] = Classic_Lasso_linsys_solver1(opts,rhsz,optcg);
 
         out.dy = {[]};
         out.dz = {dz};
@@ -364,7 +376,7 @@ elseif strcmp(params.method,'direct')
         rhsz = rhs.rhsz{1};
         opts.Ayes = params.Ayes;
         opts.A = params.B;
-        [dz,resnrm,solve_ok,solver] =  Fused_Lasso_linsys_solver1(opts,rhsz,optcg);;
+        [dz,resnrm,solve_status,solver] =  Fused_Lasso_linsys_solver1(opts,rhsz,optcg);;
 
         out.dy = {[]};
         out.dz = {dz};

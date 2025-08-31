@@ -32,7 +32,7 @@ Here we list some examples of the problem.
 2.  **Download the package:**
     Clone this repository from GitHub.
 
-3.  **Compile mex functions (optional):**
+3.  **Compile mex functions:**
     We have compiled mex functions for SSNCVX, but if there are any issues with the compiled mex functions, you can compile them yourself.
     
     Navigate to the `src\mexfun` directory within the package, delete files with suffix `.mexw64`, `.mexa64`, `.mexmaci64`, `.mexmaca64`. Then open `Installmex_ssm.m` in MATLAB and run it.
@@ -42,7 +42,7 @@ Here we list some examples of the problem.
 
     If the script runs without any errors, the solver has been installed correctly.
 
-5.  **Add datasets and set path (optional):**
+5.  **Add datasets and set path:**
     If you want to use scripts in `example` directory to solve problems mentioned in the paper, please modify `example\addpath_data.m` and add the path of the datasets to the `data_dir` variable.
 
 
@@ -243,7 +243,7 @@ legend('True Signal', 'Recovered Signal');
 title('Lasso: True vs. Recovered Signal');
 grid on;
 ```
-![lasso](./tutorial_lasso.png)
+![lasso](./doc/tutorial_lasso.png)
 
 ### Fused Lasso
 
@@ -340,7 +340,7 @@ legend('True Signal', 'Recovered Signal');
 title('Fused Lasso: True vs. Recovered Signal');
 grid on;
 ```
-![fused](./tutorial_fused.png)
+![fused](./doc/tutorial_fused.png)
 
 ### QP
 
@@ -660,8 +660,22 @@ title('Recovered Matrix');
 axis square;
 ```
 ![lrmc](./tutorial_lrmc.png)
-## User defined f or pblk
+## User defined $f$ or $p$
+SSNCVX allows users to define their own functions for `f` (the smooth part) or `pblk` (the nonsmooth part) if the built-in types do not cover their specific needs. This flexibility enables the solver to handle a wider range of optimization problems. Specifically, users need to define the following components:
+1. **Primal and dual objection function**: The user needs to define the primal and dual objective functions corresponding to their custom `f` or `pblk`. This involves specifying how to compute the function values given the input variables.
+   
+2. **Proximal Operator for pblk**: If you define a custom nonsmooth function `p(x)`, you need to provide its proximal operator. The proximal operator is defined as:
 
+   $$
+   \text{prox}_{\lambda p}(v) = \arg\min_x \left( p(x) + \frac{1}{2\lambda} \|x - v\|^2 \right)
+   $$
+
+   You should implement this as a MATLAB function that takes in the vector `v` and the parameter `lambda`, and returns the result of the proximal operation.
+3. **Gradient and Hessian for $f^*$(if differentable) or the generalized jacboian $D\tilde{D}^{-1}D + \sigma D$ (if nonsmooth) of $f$**: For a custom smooth function `f(y)`, you need to provide its gradient and, if possible, its Hessian (or an approximation). 
+
+4. **$D\tilde{D}^{-1}$ and $\tilde{D}^{-1}$ for $p$ or $f^*$ (if nonsmooth)**: If `f` is nonsmooth, you need to provide the generalized Jacobian `D` and its inverse $\tilde{D}^{-1}$. This is crucial for the semi-smooth Newton method used in SSNCVX.
+
+Since the implementation of custom functions can be complex and highly dependent on the specific problem, there may be some bug or issues. If you encounter any problems or have questions, please feel free to contact one of the authors listed below.
 ## References
 
 If SSNCVX is useful in your research, please cite [our paper](#):

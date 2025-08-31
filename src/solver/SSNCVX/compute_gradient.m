@@ -1,9 +1,19 @@
 function [F,S,x4, params] = compute_gradient(y,z,r,v,x1,x2,x3,x4,params)
-%% compute_gradient: compuate the gradient of the saddle point problem
+%% compute_gradient: compute the gradient of the saddle point problem
 %%
 %% Copyright (c) 2025 by
 %% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
 %%
+%%  [F,S,x4, params] = compute_gradient(y,z,r,v,x1,x2,x3,x4,params);
+%%  Input:   y,z,r,v: the primal variable. 
+%%       x1,x2,x3,x4: the dual variable.
+%%     params: a structure that specifies parameters required in compute_gradient.m,
+%%              (if it is not given, the default in SSNCVX is used). 
+%%
+%%  Output:       F : the gradient information
+%%                S : Intermediate variable
+%%               x4 ： variable of the original probelm
+
 F.res = 0;
 if params.Aboxflag == 1
     if params.Axeqb

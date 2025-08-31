@@ -9,7 +9,7 @@ test_dir = '..';
 addpath([root_dir]);
 addpath(genpath(test_dir));
 dir_results = "../results";
-dir_data = addpath_data();
+dir_data = '../data';
 dataset = "theta";
 probnames = thetaprobs;
 % save_root = strcat(dir_results,'/' ,dataset);

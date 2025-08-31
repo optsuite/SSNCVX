@@ -1,3 +1,8 @@
+%% Dphi1_tensor: use the iterative method to solve the linear equation
+%%
+%% Copyright (c) 2025 by
+%% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
+%%
 function iHWu= DPhi1_tensor(params)
     iHWu.par =params.par;
 for k = 1:ceil((n3+1)/2)

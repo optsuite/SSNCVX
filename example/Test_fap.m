@@ -4,10 +4,10 @@
 %% Zhanwang Deng, Tao Wei, Jirui Ma, Zaiwen Wen
 %%
 clear;
-test_dir = '..';
-addpath(genpath(test_dir));
+% test_dir = '..';
+% addpath(genpath(test_dir));
 
-dir_data = addpath_data();
+dir_data = '../data';
 dataset = "fap";
 probnames = fapprobs;
 
