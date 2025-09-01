@@ -13,7 +13,7 @@ fname{3} = 'CONT-201';
 fname{4} = 'CVXQP3_L';
 seed = 2024;
 rng(seed);
-for i = 16%
+for i = 1%
     %% One block problem
     probname = [datadir,filesep,fname{i}];
     fprintf('\n Problem name: %s \n', fname{i});

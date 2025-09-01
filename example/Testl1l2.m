@@ -7,7 +7,7 @@ addpath(genpath('../'));
 clear
 problemtype = 'Lasso';
 datadir = '../data/Lasso';
-fname{1} = 'E2006.test';
+fname{1} = 'uci_CT';
 for i = 1
     %% One block problem
     probname = [datadir,filesep,fname{i}];

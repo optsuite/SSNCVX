@@ -10,7 +10,7 @@ problemtype = 'Lasso';
 datadir = '../data/Lasso';
 fname{1} = 'uci_CT';
 fname{2} = 'E2006.test';
-for i = 12% 1  3 11 12
+for i = 1% 1  3 11 12
     %% One block problem
     probname = [datadir,filesep,fname{i}];
     fprintf('\n Problem name: %s \n', fname{i});

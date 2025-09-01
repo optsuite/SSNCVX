@@ -3,9 +3,6 @@
 
    curdir = pwd;  
    fprintf(' current directory is:  %s\n',curdir);    
-%%
-%% generate mex files in Mexfun
-%%    
    if (nargin==0); recompile = 0; end
    computer_model = computer;
    matlabversion = sscanf(version,'%f');
@@ -71,10 +68,10 @@
 %%
    ext = mexext; 
    for k = 1:length(fname)
-      % existmex = exist([fname{k},'.',ext]); 
-      % if (existmex ~= 3) | (recompile)
+      existmex = exist([fname{k},'.',ext]); 
+      if (existmex ~= 3) | (recompile)
          cmd([mexcmd,fname{k},'  ',fname{k},'.c  ',libstr]);  
-      % end
+      end
    end 
    cd .. 
    cd ..
