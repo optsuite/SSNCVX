@@ -7,7 +7,7 @@ addpath(genpath('../'));
 clear
 datadir = '../data/Lasso';
 fname{1} = 'uci_CT';
-for i =1% 1  3 11 12
+for i =1%
     %% One block problem
     probname = [datadir,filesep,fname{i}];
     load([probname,'.mat'])

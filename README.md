@@ -22,7 +22,7 @@ where $p(\mathbf{x})$ is a convex and nonsmooth function,  $\mathcal{A}: \mathca
 
 
 Here we list some examples of the problem.
-![图片描述](./problem.jpg)
+![图片描述](./figure/problem.jpg)
 
 ## Installation
 
@@ -243,7 +243,7 @@ legend('True Signal', 'Recovered Signal');
 title('Lasso: True vs. Recovered Signal');
 grid on;
 ```
-![lasso](./doc/tutorial_lasso.png)
+![lasso](./figure/tutorial_lasso.png)
 
 ### Fused Lasso
 
@@ -340,7 +340,7 @@ legend('True Signal', 'Recovered Signal');
 title('Fused Lasso: True vs. Recovered Signal');
 grid on;
 ```
-![fused](./doc/tutorial_fused.png)
+![fused](./figure/tutorial_fused.png)
 
 ### QP
 
@@ -659,7 +659,7 @@ imagesc(xopt.var{1});
 title('Recovered Matrix');
 axis square;
 ```
-![lrmc](./tutorial_lrmc.png)
+![lrmc](./figure/tutorial_lrmc.png)
 ## User defined $f$ or $p$
 SSNCVX allows users to define their own functions for `f` (the smooth part) or `pblk` (the nonsmooth part) if the built-in types do not cover their specific needs. This flexibility enables the solver to handle a wider range of optimization problems. Specifically, users need to define the following components:
 1. **Primal and dual objection function**: The user needs to define the primal and dual objective functions corresponding to their custom `f` or `pblk`. This involves specifying how to compute the function values given the input variables.

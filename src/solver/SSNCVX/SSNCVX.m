@@ -15,7 +15,7 @@ function [xopt, out] = SSNCVX(x0,pblk,Bt,f,Q,C,l,u,At,lb,ub,opts)
 %%     opts: a structure that specifies parameters required in SSNCVX.m,
 %%              (if it is not given, the default in SSNCVX is used). 
 %%
-%%  Output:          xopt : the optimal solution 
+%%  Output:         xopt : the optimal solution 
 %%          out.totatime  : the total-time
 %%          out.iter      : number of iterations
 %%          out.pobj      : primal objective value,

@@ -2,7 +2,7 @@
    function Installmex_ssm(recompile)
 
    curdir = pwd;  
-   fprintf(' current directory is:  %s\n',curdir);    
+   fprintf(' pwd:  %s\n',curdir);    
    if (nargin==0); recompile = 0; end
    computer_model = computer;
    matlabversion = sscanf(version,'%f');
@@ -69,7 +69,7 @@
    ext = mexext; 
    for k = 1:length(fname)
       existmex = exist([fname{k},'.',ext]); 
-      if (existmex ~= 3) | (recompile)
+      if (existmex ~= 3) || (recompile)
          cmd([mexcmd,fname{k},'  ',fname{k},'.c  ',libstr]);  
       end
    end 

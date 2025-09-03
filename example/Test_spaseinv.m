@@ -82,7 +82,7 @@ for i = 1
 
      [xopt, out] = SSNCVX([],pblk2,[],f2,[],C2,[],[],[],[],[],opts);
 
-    -0.5*log(det(xopt.var{1})) + norm(reshape(xopt.var{1},[],1),1) + xopt.var{1}(:)'*C{1}(:)
+    -0.5*log(det(xopt.var{1})) + norm(reshape(xopt.var{1},[],1),1) + xopt.var{1}(:)'*C{1}(:);
 
 end
 out.totaltime

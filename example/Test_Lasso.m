@@ -24,7 +24,7 @@ for i = 1% 1  3 11 12
 
     [m,n] = size(A);
     Bt = A';
-    crho = 1e-3;%
+    crho = 1e-3;
     lambdamax=norm(Bt*b,'inf');
     lambda=crho*lambdamax;
 
