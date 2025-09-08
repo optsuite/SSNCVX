@@ -48,112 +48,6 @@ Here we list some examples of the problem.
 
 ## Examples
 
-### LP
-
-This tutorial will guide you through solving your first Linear Program (LP) using the SSNCVX solver. An LP is a fundamental type of optimization problem that involves minimizing a linear objective function subject to linear constraints.
-
---------------
-**The Problem**
-
-The standard form for a Linear Program that SSNCVX solves is:
-
-```
-minimize    c' * x
-subject to  A * x = b
-            x >= 0
-```
-
-Where `x` is the vector of optimization variables. For our first example, we will solve the following simple LP:
-```
-minimize    -x1 - 2*x2
-subject to  2*x1 + x2 = 4
-            x1 + 2*x2 = 4
-            x1, x2 >= 0
-```
-
---------------
-**MATLAB Implementation**
-
-Here is the complete MATLAB script to solve this problem. You can copy and paste this into a new `.m` file and run it.
-
-```matlab
-%% Tutorial for Linear Programming (LP)
-% This script demonstrates how to solve an LP problem using SSNCVX.
-% The problem is defined in the standard form:
-%
-% min c'*x
-% s.t. A*x = b
-%      x >= 0
-%
-% where x >= 0 means that x is in the non-negative orthant (a linear cone).
-%
-% We will solve a simple LP problem:
-% min -x1 - x2
-% s.t. x1 + 2*x2 = 6
-%      3*x1 + 2*x2 = 12
-%      x1, x2 >= 0
-% The optimal solution is x = [3; 1.5] with an objective value of -4.5.
-
-clear;clc;
-addpath(genpath('../')); % Make sure the path to the solver is correct
-
-%% Problem Data Construction
-% min -x1 - x2  => c = [-1; -1]
-C = {[-1; -1]};
-n = 2; % Number of variables
-
-% s.t. x1 + 2*x2 = 6
-%      3*x1 + 2*x2 = 12
-% A = [1 2; 3 2], b = [6; 12]
-% The solver requires At (transpose of A)
-At = {[1 3; 2 2]};
-b = [6; 12];
-lb = b; % Lower bound for A*x
-ub = b; % Upper bound for A*x
-m = 2;  % Number of equality constraints
-
-% s.t. x >= 0
-% This defines a non-negative constraint on x, i.e., a linear cone.
-% The cone is of size n.
-pblk{1} = struct;
-pblk{1}.type = 'l'; % 'l' for linear cone (non-negativity)
-pblk{1}.size = n;
-pblk{1}.coefficient = 1; % Not used in this context, but required
-
-% The K structure is also needed by the solver options
-K{1} = struct;
-K{1}.type = 'l';
-K{1}.size = n;
-
-%% Initial guess and solver options
-opts = struct();
-opts.method = 'direct'; % Use the direct method solver
-opts.K = K;
-opts.m = m;
-
-%% Call the solver
-fprintf('Solving a small LP problem...\n');
-% The function call is similar to the SOCP example.
-% We pass our LP-specific data: pblk, C, At, lb, ub, opts.
-[xopt, out] = SSNCVX([], pblk, [], [], [], C, [], [], At, lb, ub, opts);
-
-%% Display results
-fprintf('Solver finished.\n');
-fprintf('Total time: %f seconds\n', out.totaltime);
-
-% The optimal solution is in xopt.var{1}
-sol = xopt.var{1};
-fprintf('Optimal solution x = [%f, %f]\n', sol(1), sol(2));
-fprintf('Optimal objective value c''*x = %f\n', C{1}'*sol);
-
-% Verify constraints
-fprintf('Constraint violation ||Ax-b||: %e\n', norm(At{1}'*sol - b));
-if all(sol >= -1e-6) % Allow for small numerical tolerance
-    fprintf('Non-negativity constraint x >= 0 is satisfied.\n');
-else
-    fprintf('Non-negativity constraint is VIOLATED.\n');
-end
-```
 
 ### Lasso
 
@@ -681,7 +575,10 @@ Since the implementation of custom functions can be complex and highly dependent
 If SSNCVX is useful in your research, please cite [our paper](#):
 
 ```bibtex
-@article{deng2025augmented,
+@misc{deng2025ssncvx,
+  title={SSNCVX: A primal-dual semismooth Newton method for convex composite optimization},
+  author={Zhanwang Deng and Tao Wei and Jirui Ma and Zaiwen Wen},
+  year={2025},
 }
 ```
 
