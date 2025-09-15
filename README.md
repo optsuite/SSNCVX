@@ -571,6 +571,21 @@ SSNCVX allows users to define their own functions for `f` (the smooth part) or `
 
 Since the implementation of custom functions can be complex and highly dependent on the specific problem, there may be some bug or issues. If you encounter any problems or have questions, please feel free to contact one of the authors listed below.
 ## References
+Our work on semi-smooth Newton Methods:
+- 	Liu Yiyang, Liu Haoyang, Nie Hantao, Wen Zaiwen, A DRS-Based Path-Following Algorithm for Linear Programming, Journal of Computational Mathematics, 2025
+- 	Nie Hantao, Ma Jirui, Wen Zaiwen, Zhang Fan, An Operator Splitting-Based Interior-Point Method for Conic Linear Programming, Journal of the Operations Research Society of China, 2025
+- 	Hu Jiang, Tian Tonghua, Pan Shaohua, Wen Zaiwen, On the local convergence of the Semismooth Newton Method for composite optimization, Journal of Scientific Computing, 2025, arXiv:2211.01127
+- 	Deng Zhanwang, Deng Kangkang, Hu Jiang, Wen Zaiwen, An Augmented Lagrangian Primal-Dual Semismooth Newton method for multi-block composite optimization, Journal of Scientific Computing, 2025
+- 	Zhou Yuxin, Jiayuan Wu, Wang Rui, Song Jie, Wen Zaiwen, A Semismooth Newton Augmented Lagrangian Method for Solving Nonlinear Programming, SCIENTIA SINICA Mathematica, 2025
+- 	Wang Yifei, Deng Kangkang, Liu Haoyang, Wen Zaiwen, A Decomposition Augmented Lagrangian Method for Low-rank Semidefinite Programming, SIAM Journal on Optimization, Vol. 33, No. 3, 1361-1390, 2023
+- 	Liu Yiyang, Wen Zaiwen, Wotao Yin, A multiscale semi-smooth Newton method for Optimal Transport, Journal of Scientific Computing, Vol. 91, No. 2, 39, 2022
+- 	Andre Milzarek, Xiao Xiantao, Wen Zaiwen, Michael Ulbrich; On the local convergence of a stochastic semismooth Newton method for nonsmooth nonconvex optimization, Science in China Series A: Mathematics, Vol. 65, 2151–2170,2022
+- 	Andre Milzarek, Xiao Xiantao, Cen Sicong, Wen Zaiwen, Michael Ulbrich; A stochastic semi-smooth Newton method for nonsmooth nonconvex optimization, SIAM Journal on Optimization, Vol 29, No. 4, pp. 2916–2948, 2019
+- 	Li Yongfeng, Wen Zaiwen, Yang Chao, Yuan Yaxiang; A Semi-smooth Newton Method For semidefinite programs and its applications in electronic structure calculations; SIAM Journal on Scientific Computing; Vol 40, No. 6, 2018, A4131–A4157
+- 	Xiao Xiantao, Li Yongfeng, Wen Zaiwen, Zhang Liwei; A Regularized Semi-Smooth Newton Method with Projection Steps for Composite Convex Programs; Journal of Scientific Computing; 2018, Vol 76, No. 1, pp 364-389
+- 	Deng Zhanwang, Hu Jiang, Deng Kangkang, Wen Zaiwen, A Primal Dual Semismooth Newton Method for Semidefinite Programming, arXiv:2504.14333  
+- 	Deng Zhanwang, Wei Tao, Ma Jirui, Wen Zaiwen, Deng Zhanwang, Hu Jiang, Deng Kangkang, Wen Zaiwen, A Primal Dual Semismooth Newton Method for Semidefinite Programming, 2025
+
 
 If SSNCVX is useful in your research, please cite [our paper](#):
 
