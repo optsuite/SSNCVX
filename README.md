@@ -571,7 +571,7 @@ SSNCVX allows users to define their own functions for `f` (the smooth part) or `
 
 Since the implementation of custom functions can be complex and highly dependent on the specific problem, there may be some bug or issues. If you encounter any problems or have questions, please feel free to contact one of the authors listed below.
 ## References
-Our work on semi-smooth Newton Methods:
+Our work on the semi-smooth Newton Methods:
 - 	Liu Yiyang, Liu Haoyang, Nie Hantao, Wen Zaiwen, A DRS-Based Path-Following Algorithm for Linear Programming, Journal of Computational Mathematics, 2025
 - 	Nie Hantao, Ma Jirui, Wen Zaiwen, Zhang Fan, An Operator Splitting-Based Interior-Point Method for Conic Linear Programming, Journal of the Operations Research Society of China, 2025
 - 	Hu Jiang, Tian Tonghua, Pan Shaohua, Wen Zaiwen, On the local convergence of the Semismooth Newton Method for composite optimization, Journal of Scientific Computing, 2025, arXiv:2211.01127
