@@ -584,7 +584,7 @@ Our work on the semi-smooth Newton Methods:
 - 	Li Yongfeng, Wen Zaiwen, Yang Chao, Yuan Yaxiang; A Semi-smooth Newton Method For semidefinite programs and its applications in electronic structure calculations; SIAM Journal on Scientific Computing; Vol 40, No. 6, 2018, A4131–A4157
 - 	Xiao Xiantao, Li Yongfeng, Wen Zaiwen, Zhang Liwei; A Regularized Semi-Smooth Newton Method with Projection Steps for Composite Convex Programs; Journal of Scientific Computing; 2018, Vol 76, No. 1, pp 364-389
 - 	Deng Zhanwang, Hu Jiang, Deng Kangkang, Wen Zaiwen, A Primal Dual Semismooth Newton Method for Semidefinite Programming, arXiv:2504.14333  
-- 	Deng Zhanwang, Wei Tao, Ma Jirui, Wen Zaiwen, A Primal Dual Semismooth Newton Method for Semidefinite Programming, 2025
+- 	Deng Zhanwang, Wei Tao, Ma Jirui, Wen Zaiwen, SSNCVX: A primal-dual semismooth Newton method for convex composite optimization, 2025
 
 
 If SSNCVX is useful in your research, please cite [our paper](#):
