@@ -9,14 +9,6 @@ if ~isfield(opts, 'maxits'); opts.maxits = 1000; end
 if ~isfield(opts, 'tol'); opts.tol = 1e-6; end
 if ~isfield(opts, 'tolscale'); opts.tolscale = 1; end
 
-%% -------------------------------------------------------------------------
-% options for fixed-point algorithms
-if ~isfield(opts, 'ADMMopts'); opts.ADMMopts = struct; end
-ADMMopts = opts.ADMMopts;
-if ~isfield(ADMMopts, 'print_itr'); ADMMopts.print_itr = 20; end
-if ~isfield(ADMMopts, 'rho'); ADMMopts.rho = 1.618; end
-if ~isfield(ADMMopts, 'imaxit'); ADMMopts.imaxit = 20000; end
-opts.ADMMopts = ADMMopts;
 
 %% ------------------------------------------------------------------------
 % options for the semismooth Newton algorithm
@@ -45,7 +37,7 @@ if ~isfield(opts, 'method'); opts.method = 'iterative'; end
 % parameter for CG
 if ~isfield(opts, 'cgopts'); opts.cgopts = struct; end
 cgopts = opts.cgopts;
-if ~isfield(cgopts, 'CG_maxit'); cgopts.CG_maxit = 500; end %可调
+if ~isfield(cgopts, 'CG_maxit'); cgopts.CG_maxit = opts.cgmin; end %可调
 if ~isfield(cgopts, 'CG_tol'); cgopts.CG_tol = 1e-2; end
 if ~isfield(cgopts, 'cgtolmin'); cgopts.cgtolmin = opts.cgtol; end
 if ~isfield(cgopts, 'CG_adapt'); cgopts.CG_adapt = 1; end
