@@ -593,6 +593,7 @@ If SSNCVX is useful in your research, please cite [our paper](#):
 @misc{deng2025ssncvx,
   title={SSNCVX: A primal-dual semismooth Newton method for convex composite optimization},
   author={Zhanwang Deng and Tao Wei and Jirui Ma and Zaiwen Wen},
+  note={arXiv:2509.11995}
   year={2025},
 }
 ```
