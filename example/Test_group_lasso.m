@@ -24,7 +24,7 @@ lambda = 0.1;
 %% pblk setting for the l1-norm penalty
 % p(x) = lambda*||x||_1
 pblk{1} = struct;
-pblk{1}.type = 'topk';
+pblk{1}.type = 'l2';
 pblk{1}.topk = 10;
 pblk{1}.size = n;
 pblk{1}.coefficient = lambda;
