@@ -3,7 +3,7 @@
 
 - SSNCVX (**S**emi-**S**mooth **N**ewton method for **C**on**v**e**x** optimization) is both the name of **our software package** and the **underlying algorithmic framework**.
 - It is designed to efficiently solve **convex composite optimization problems**, including those with nonsmooth terms and conic constraints, as well as multi-block structures.
-- The **MATLAB** version is open source in this repo and specific details can be found in [this paper](#).
+- The **MATLAB** version is open source in this repo and specific details can be found in [this paper](https://arxiv.org/abs/2509.11995).
 - The ​​**C**++​​ version, is specifically designed to handle conic programming problems and offers improved performance for large-scale instances.
 - Visit [our website](http://faculty.bicmr.pku.edu.cn/~wenzw/ssncvx/index.html) for more detailed information.
 
