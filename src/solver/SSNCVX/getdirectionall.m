@@ -542,7 +542,7 @@ end
 if isfield(params.D,'D1')
     tzb = params.D.D1 .* outcg.dy;
     tmp4 = - (tzb + Fx1);
-    dx1 = (tmp4*sigma/(1+taux1*sigma) + (params.D.D1 .* tmp1)*1/(taux1*(1+taux1*sigma)));
+    dx1 = (tmp4*sigma/(1+taux1*sigma) + (params.D.D1 .* tmp4)*1/(taux1*(1+taux1*sigma)));
 else
     dx1 = 0;
 end
